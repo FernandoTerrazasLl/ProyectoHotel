@@ -1,0 +1,98 @@
+.check-in{
+    padding: 2rem 12rem 2rem 12rem;
+}
+.check-in__title{
+    font-size: 1.5rem;
+}
+.check-in__list{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 4rem;
+}
+.check-in__no-reservation-icon{
+
+}
+.check-in__no-reservation-text{
+    color: #717182;
+}
+
+/* Items del check item */
+.check-in__item{
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 0.75rem;
+    background-color: #FFF;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+.check-in__item-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.check-in__guest-name{
+    margin: 0;
+    font-size: 1rem;
+    font-weight: normal;
+}
+.check-in__status-container{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.check-in__status-input{
+    color: #193CB8;
+    padding: 0.3rem 0.7rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    background-color: #DBEAFE;
+}
+.check-in__room-info{
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: #717182;
+}
+.check-in__item-data{
+    display: grid;
+    gap: 0.4rem;
+}
+.check-in__info{
+    color: #717182;
+    font-size: 0.9rem;
+}
+.check-in__buttons{
+    display: flex;
+    gap: 0.5rem;
+}
+.check-in__btn-check-in{
+    background-color: #00A63E;
+    color:#FFF;
+    font-weight: normal;
+    padding: 0.4rem;
+    border-radius: 0.5rem;
+    border: 1px solid #00A63E;
+    cursor: pointer;
+}
+.check-in__btn-check-out{
+    background-color: #030213;
+    color:#FFF;
+    font-weight: normal;
+    padding: 0.4rem;
+    border-radius: 0.5rem;
+    border: 1px solid #030213;
+    cursor: pointer;
+}
+.check-in__btn-cancel{
+    border-color: #D4183D;
+    border: 1px solid;
+    color: #D4183D;
+    font-weight: normal;
+    padding: 0.4rem;
+    border-radius: 0.5rem;
+    background-color: transparent;
+    cursor: pointer;
+}

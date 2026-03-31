@@ -1,0 +1,54 @@
+.nav{
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+}
+.nav__hotel-name{
+    font-size: 16px;
+}
+.nav__links{
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+
+}
+.nav__link{
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.nav__booking-icon{
+
+}
+.nav__booking-text{
+    font-size: 16px;
+    text-decoration: none;
+    color: #717182;
+}
+.nav__customer-icon{
+
+}
+.nav__customer-text{
+    font-size: 16px;
+    text-decoration: none;
+    color: #717182;
+}
+.nav__check-in-icon{
+
+}
+.nav__check-in-text{
+    font-size: 16px;
+    text-decoration: none;
+    color: #717182;
+}
+.nav__services-icon{
+
+}
+.nav__services-text{
+    font-size: 16px;
+    text-decoration: none;
+    color: #717182;
+}

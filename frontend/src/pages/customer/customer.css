@@ -1,0 +1,222 @@
+.customer{
+    padding: 2rem 12rem 2rem 12rem;
+}
+.customer__header{
+    display: flex;
+    flex-direction: column;
+}
+.customer__title-btn{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.customer__title{
+    font-size: 1.5rem;
+    margin: 0;
+    
+}
+.customer__create-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem;
+    background-color: #030213;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+}
+.customer__create-icon{
+
+}
+.customer__create-text{
+    color: #FFF;
+    font-size: 1rem;
+}
+
+.customer__search{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding:0.7rem;
+    background-color: #F3F3F5;
+    border-radius: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+
+
+}
+.customer__search-icon{
+
+}
+.customer__search-input{
+    border:none;
+    background-color: transparent;
+    width: 100%;
+}
+.customer__list{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 4rem;
+    width: 100%;
+}
+.customer__no-reservation-icon{
+
+}
+.customer__no-reservation-text{
+    color: #717182;
+}
+
+/* Items del huesped */
+.customer__item{
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 0.75rem;
+    background-color: #FFF;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.customer__item-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.customer__item-name{
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: normal;
+}
+
+.customer__item-document{
+    color: #717182;
+    font-size: 0.9rem;
+}
+
+.customer__item-data{
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.customer__item-detail{
+    margin: 0;
+    color: #717182;
+    font-size: 0.9rem;
+}
+
+/*Formulario*/
+.customer__form-background{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    inset:0;
+    background: rgba(0,0,0,0.6);
+    z-index: 9999;
+}
+.customer__form-background--hidden{
+    display: none;
+}
+.customer__form-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #F3F3F5;
+    border-radius: 1rem;
+    padding: 2rem;
+    z-index: 10000;
+    width: 30%;
+}
+.customer__form-title{
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    align-self: flex-start;
+    padding-bottom: 1rem;
+}
+.customer__form{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+.customer__form-feedback{
+    width: 100%;
+    border-radius: 0.5rem;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+.customer__feedback-list{
+    margin: 0;
+    padding-left: 1rem;
+    display: grid;
+    gap: 0.35rem;
+}
+.customer__form-feedback--hidden{
+    display: none;
+}
+.customer__form-feedback--error{
+    background-color: #fdecec;
+    color: #a11332;
+    border: 1px solid #f5b3c2;
+}
+.customer__form-feedback--success{
+    background-color: #e9f9ef;
+    color: #0f6b34;
+    border: 1px solid #a9e4bf;
+}
+.customer__form-field{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+.customer__form-label{
+    color:#717182;
+}
+.customer__form-input{
+    padding: 0.7rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.customer__form-input-select{
+    appearance: none;
+    padding-right: 2.4rem;
+    background-image: url("/images/form__arrow_down.svg");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+}
+.customer__form-row{
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+.customer__form-actions{
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+.customer__form-cancel{
+    padding: 0.7rem 1.5rem;
+    background-color: #F3F3F5;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+.customer__form-submit{
+    padding: 0.7rem 1.5rem;
+    background-color: #030213;
+    color: #FFF;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}

@@ -1,0 +1,50 @@
+.services{
+    padding: 2rem 12rem 2rem 12rem;
+}
+.services__title{
+    font-size: 1.5rem;
+}
+
+.services__list{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4rem;
+    flex-wrap: wrap;
+
+}
+.services__service{
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 0.5rem;
+    padding: 1rem 2rem 1rem 2rem;
+    width: 40%;
+    margin: 0.5rem 0.5rem;
+}
+.services__service-title{
+    
+}
+.services__employee{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.services__employee-icon{
+
+}
+.services__employee-name{
+    color: #717182;
+}
+
+.services__telephone{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.services__telephone-icon{
+
+}
+.services__telephone-number{
+    color: #717182;
+}
+            

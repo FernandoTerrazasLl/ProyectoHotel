@@ -1,0 +1,78 @@
+<section class="customer">
+    <div class="customer__header">
+        <div class="customer__title-btn">
+            <h1 class="customer__title">Huespedes</h1>
+            <button class="customer__create-btn">
+                <img src="/images/new-register-icon.svg" alt="icono nuevo huesped" class="customer__create-icon">
+                <span class="customer__create-text">Nuevo Huesped</span>
+            </button>
+        </div>
+
+        <div class="customer__search">
+            <img src="/images/reservation__search_icon.svg" alt="icono buscar reserva" class="customer__search-icon">
+            <input type="text" placeholder="Buscar por huesped..." class="customer__search-input">
+        </div>
+    </div>
+
+    <div class="customer__list">
+    </div>
+    
+    <!-- Formulario de registro -->
+    <div class="customer__form-background--hidden customer__form-background"><!-- Cambia de clase dinamicamente -->
+        <div class="customer__form-container">
+            <h2 class="customer__form-title">Registrar Huesped</h2>
+
+            <form class="customer__form">
+                <div class="customer__form-feedback customer__form-feedback--hidden" role="status" aria-live="polite"></div>
+
+                <label class="customer__form-field">
+                <span class="customer__form-label">Nombre</span>
+                <input type="text" name="firstName" class="customer__form-input" required>
+                </label>
+
+                <label class="customer__form-field">
+                    <span class="customer__form-label">Apellidos</span>
+                    <input type="text" name="lastName" class="customer__form-input" required>
+                </label>
+                
+                <div class="customer__form-row">
+                    <label class="customer__form-field">
+                        <span class="customer__form-label">Tipo Documento</span>
+                        <select name="documentType" class="customer__form-input customer__form-input-select" required>
+                            <option value="">Seleccionar </option>
+                            <option value="DNI">DNI</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                        </select>
+                    </label>
+
+                    <label class="customer__form-field">
+                        <span class="customer__form-label">Nº Documento</span>
+                        <input type="text" name="documentId" class="customer__form-input" required>
+                    </label>
+                </div>
+
+                <label class="customer__form-field">
+                    <span class="customer__form-label">Email</span>
+                    <input type="email" name="email" class="customer__form-input" required>
+                </label>
+
+                <label class="customer__form-field">
+                    <span class="customer__form-label">Telefono</span>
+                    <input type="tel" name="phone" class="customer__form-input" required>
+                </label>
+
+                <label class="customer__form-field">
+                    <span class="customer__form-label">Pais</span>
+                    <select name="country" class="customer__form-input customer__form-input-select" required>
+                        <option value="">Seleccionar</option>
+                    </select>
+                </label>
+
+                <div class="customer__form-actions">
+                    <button type="button" class="customer__form-cancel">Cancelar</button>
+                    <button type="submit" class="customer__form-submit">Crear Huesped</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
