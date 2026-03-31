@@ -162,6 +162,8 @@ Requisitos:
 
 - `backend/appsettings.json`
 - o `backend/appsettings.Development.json`
+- Usuario usado en la bd terrazasllanosfernando
+- Host=localhost;Port=5432;Database=hotel;Username=ejemplo;Password=ejemplo;
 
 2. Ejecutar backend:
 
