@@ -1,4 +1,4 @@
-# Sistema de Reservas para Hotel Pequeno (MVP academico)
+# Sistema de Reservas para Hotel Pequeno
 
 ## 1. Descripcion general de la solucion
 
