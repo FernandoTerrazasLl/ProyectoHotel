@@ -130,7 +130,8 @@ Implementado:
 
 ### Funcionalidad adicional implementada
 
-- Registro de check-out (`/api/bookings/{id}/check-out`) con cambio de estado a `checked_out` y hora de salida.
+- Registro de check-out con cambio de estado a `checked_out` y hora de salida.
+- Buscadores para huesped y booking
 
 ## 5. Alcance del prototipo y limites
 
@@ -164,6 +165,7 @@ Requisitos:
 - o `backend/appsettings.Development.json`
 - Usuario usado en la bd terrazasllanosfernando
 - Host=localhost;Port=5432;Database=hotel;Username=ejemplo;Password=ejemplo;
+- La base de datos esta en la carpeta Base de Datos de este proyecto (archivo .bak)
 
 2. Ejecutar backend:
 
