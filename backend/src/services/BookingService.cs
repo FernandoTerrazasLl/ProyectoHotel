@@ -1,23 +1,21 @@
-public class BookingService : IBookingService
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class BookingService
 {
-    private const int LateCancellationHoursThreshold = 48;
-    private const decimal LateCancellationRate = 0.20m;
-
-    private readonly IBookingRepository _bookingRepository;
-    private readonly IGuestRepository _guestRepository;
-    private readonly IRoomRepository _roomRepository;
-    private readonly IEnumerable<IRoomTypePresetCreator> _roomTypePresetCreators;
-
+    private readonly BookingRepository _bookingRepository;
+    private readonly GuestRepository _guestRepository;
+    private readonly RoomRepository _roomRepository;
     public BookingService(
-        IBookingRepository bookingRepository,
-        IGuestRepository guestRepository,
-        IRoomRepository roomRepository,
-        IEnumerable<IRoomTypePresetCreator> roomTypePresetCreators)
+        BookingRepository bookingRepository,
+        GuestRepository guestRepository,
+        RoomRepository roomRepository)
     {
         _bookingRepository = bookingRepository;
         _guestRepository = guestRepository;
         _roomRepository = roomRepository;
-        _roomTypePresetCreators = roomTypePresetCreators;
     }
 
     public async Task<OperationResult<BookingSummaryDto>> CreateBookingAsync(CreateBookingRequest request)
@@ -51,7 +49,14 @@ public class BookingService : IBookingService
         var checkInDate = datesValidation.Data.CheckInDate;
         var checkOutDate = datesValidation.Data.CheckOutDate;
 
-        var hasOverlap = await _bookingRepository.HasOverlappingBookingAsync(request.RoomId, checkInDate, checkOutDate);
+        var allBookings = await _bookingRepository.GetAllAsync();
+        var hasOverlap = allBookings.Any(b =>
+                b.RoomId == request.RoomId &&
+                b.Status != BookingStatus.Cancelled &&
+                b.Status != BookingStatus.CheckedOut &&
+                checkInDate < b.CheckOutDate &&
+                checkOutDate > b.CheckInDate);
+
         if (hasOverlap)
         {
             return OperationResult<BookingSummaryDto>.Failure("BOOKING_OVERLAP", "Ya existe una reserva para la habitación en ese rango de fechas.");
@@ -73,7 +78,18 @@ public class BookingService : IBookingService
 
     public async Task<OperationResult<List<BookingSummaryDto>>> GetActiveAndFutureBookingsAsync()
     {
-        var bookings = await _bookingRepository.GetActiveAndFutureAsync(DateTime.Now);
+        var allBookings = await _bookingRepository.GetAllWithDetailsAsync();
+        var referenceDay = DateTime.Now.Date;
+
+        var bookings = allBookings
+            .Where(b =>
+                b.Status != BookingStatus.Cancelled &&
+                b.Status != BookingStatus.CheckedOut &&
+                b.CheckOutDate.Date >= referenceDay)
+            .OrderBy(b => b.CheckInDate)
+            .ThenBy(b => b.Id)
+            .ToList();
+
         var summaries = bookings.Select(MapToSummary).ToList();
         return OperationResult<List<BookingSummaryDto>>.Success(summaries);
     }
@@ -167,7 +183,9 @@ public class BookingService : IBookingService
         var room = await _roomRepository.GetByIdWithTypeAsync(booking.RoomId);
         var referencePrice = room?.RoomType?.PricePerNight ?? 0m;
 
-        booking.CancellationFee = CalculateSimpleLateFee(booking.CheckInDate, DateTime.Now, referencePrice);
+        var strategy = CancellationFeeStrategyFactory.GetStrategy("STRICT");
+        booking.CancellationFee = strategy.CalculateFee(booking.CheckInDate, DateTime.Now, referencePrice);
+
         booking.Status = BookingStatus.Cancelled;
 
         await _bookingRepository.UpdateAsync(booking);
@@ -322,8 +340,10 @@ public class BookingService : IBookingService
 
     private async Task<OperationResult> ValidateGuestsExistAsync(List<int> guestIds)
     {
-        var guests = await _guestRepository.GetByIdsAsync(guestIds);
-        if (guests.Count != guestIds.Count)
+        var allGuests = await _guestRepository.GetAllAsync();
+        var guestsCount = allGuests.Count(g => guestIds.Contains(g.Id));
+
+        if (guestsCount != guestIds.Count)
         {
             return OperationResult.Failure("GUEST_NOT_FOUND", "Uno o más huéspedes seleccionados no existen.");
         }
@@ -350,15 +370,7 @@ public class BookingService : IBookingService
             return OperationResult<Room>.Failure("ROOM_TYPE_NOT_FOUND", "La habitación no tiene una variación válida asociada.");
         }
 
-        var preset = ResolvePreset(roomType.Name);
-        if (preset == null)
-        {
-            return OperationResult<Room>.Failure("ROOM_TYPE_NOT_SUPPORTED", "La variación de habitación seleccionada no está soportada por el sistema.");
-        }
-
-        var resolvedCapacity = roomType.Capacity > 0 ? roomType.Capacity : preset.Capacity;
-
-        if (numberGuests > resolvedCapacity)
+        if (numberGuests > roomType.Capacity)
         {
             return OperationResult<Room>.Failure("CAPACITY_EXCEEDED", "La cantidad de personas supera la capacidad de la habitación.");
         }
@@ -390,20 +402,9 @@ public class BookingService : IBookingService
             .ToList();
     }
 
-    private static decimal CalculateSimpleLateFee(DateTime checkInDate, DateTime cancellationDate, decimal pricePerNight)
+    private List<BookingGuestDto> MapGuestsToDto(Booking booking)
     {
-        var hoursBeforeCheckIn = (checkInDate - cancellationDate).TotalHours;
-        if (hoursBeforeCheckIn >= LateCancellationHoursThreshold)
-        {
-            return 0m;
-        }
-
-        return Math.Round(pricePerNight * LateCancellationRate, 2, MidpointRounding.AwayFromZero);
-    }
-
-    private BookingSummaryDto MapToSummary(Booking booking)
-    {
-        var guests = booking.GuestBookings
+        return booking.GuestBookings
             .Where(gb => gb.Guest != null)
             .Select(gb => new BookingGuestDto
             {
@@ -418,30 +419,17 @@ public class BookingService : IBookingService
             .OrderByDescending(g => g.IsMainGuest)
             .ThenBy(g => g.GuestId)
             .ToList();
+    }
+
+    private BookingSummaryDto MapToSummary(Booking booking)
+    {
+        var guests = MapGuestsToDto(booking);
 
         var mainGuest = guests.FirstOrDefault(g => g.IsMainGuest) ?? guests.FirstOrDefault();
         var roomTypeName = booking.Room?.RoomType?.Name ?? string.Empty;
-        var preset = ResolvePreset(roomTypeName);
-
-        var resolvedTypeName = !string.IsNullOrWhiteSpace(roomTypeName)
-            ? roomTypeName
-            : preset?.TypeName ?? string.Empty;
-
-        var resolvedDescription = !string.IsNullOrWhiteSpace(booking.Room?.RoomType?.Description)
-            ? booking.Room!.RoomType!.Description
-            : preset?.Description ?? string.Empty;
-
+        var resolvedDescription = booking.Room?.RoomType?.Description ?? string.Empty;
         var resolvedCapacity = booking.Room?.RoomType?.Capacity ?? 0;
-        if (resolvedCapacity <= 0 && preset != null)
-        {
-            resolvedCapacity = preset.Capacity;
-        }
-
         var resolvedPrice = booking.Room?.RoomType?.PricePerNight ?? 0m;
-        if (resolvedPrice <= 0 && preset != null)
-        {
-            resolvedPrice = preset.ReferencePrice;
-        }
 
         return new BookingSummaryDto
         {
@@ -454,7 +442,7 @@ public class BookingService : IBookingService
             RoomId = booking.RoomId,
             RoomNumber = booking.Room?.RoomNumber ?? string.Empty,
             RoomTypeId = booking.Room?.RoomTypeId ?? 0,
-            RoomTypeName = resolvedTypeName,
+            RoomTypeName = roomTypeName,
             RoomTypeDescription = resolvedDescription,
             RoomTypeCapacity = resolvedCapacity,
             RoomTypePricePerNight = resolvedPrice,
@@ -466,16 +454,5 @@ public class BookingService : IBookingService
             CheckOutTime = booking.CheckOutTime,
             CancellationFee = booking.CancellationFee
         };
-    }
-
-    private IRoomTypePresetProduct? ResolvePreset(string roomTypeName)
-    {
-        var creator = _roomTypePresetCreators.FirstOrDefault(c => c.CanHandle(roomTypeName));
-        if (creator == null)
-        {
-            return null;
-        }
-
-        return creator.CreateProduct();
     }
 }
