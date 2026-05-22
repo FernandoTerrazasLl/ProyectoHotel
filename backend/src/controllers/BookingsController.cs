@@ -8,9 +8,9 @@ public class BookingsController : ControllerBase
     private const string EmptyAgendaMessage = "No hay datos disponibles.";
     private const string AgendaSuccessMessage = "Reservas activas y futuras.";
 
-    private readonly IBookingService _bookingService;
+    private readonly BookingService _bookingService;
 
-    public BookingsController(IBookingService bookingService)
+    public BookingsController(BookingService bookingService)
     {
         _bookingService = bookingService;
     }
@@ -18,10 +18,6 @@ public class BookingsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
 
         var result = await _bookingService.CreateBookingAsync(request);
         if (!result.IsSuccess)

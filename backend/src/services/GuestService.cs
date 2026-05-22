@@ -1,6 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
-public class GuestService : IGuestService
+public class GuestService
 {
     private const string MissingRequiredFieldsCode = "MISSING_REQUIRED_FIELDS";
     private const string MissingRequiredFieldsMessage = "Debes completar todos los campos obligatorios del huésped.";
@@ -9,9 +12,9 @@ public class GuestService : IGuestService
     private const string DuplicateDocumentCode = "DUPLICATE_DOCUMENT";
     private const string DuplicateDocumentMessage = "Ya existe un huésped con el mismo tipo y número de documento en ese país.";
 
-    private readonly IGuestRepository _repository;
+    private readonly GuestRepository _repository;
 
-    public GuestService(IGuestRepository repository)
+    public GuestService(GuestRepository repository)
     {
         _repository = repository;
     }
@@ -39,10 +42,11 @@ public class GuestService : IGuestService
             return OperationResult<Guest>.Failure(InvalidEmailCode, InvalidEmailMessage);
         }
 
-        var existsDuplicate = await _repository.ExistsByDocumentAsync(
-            request.DocumentType.Trim(),
-            request.DocumentId.Trim(),
-            request.Country.Trim());
+        var allGuests = await _repository.GetAllAsync();
+        var existsDuplicate = allGuests.Any(g =>
+            g.DocumentType == request.DocumentType.Trim() &&
+            g.DocumentId == request.DocumentId.Trim() &&
+            g.Country == request.Country.Trim());
 
         if (existsDuplicate)
         {

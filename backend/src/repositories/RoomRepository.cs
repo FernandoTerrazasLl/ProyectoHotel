@@ -1,45 +1,26 @@
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
-public class RoomRepository : IRoomRepository
+public class RoomRepository : Repository<Room>
 {
-    private readonly AppDbContext _context;
-
-    public RoomRepository(AppDbContext context)
+    public RoomRepository(AppDbContext context) : base(context)
     {
-        _context = context;
     }
 
-    public async Task<List<Room>> GetAllActiveWithTypeAsync()
+    public virtual async Task<List<Room>> GetAllWithTypesAsync()
     {
-        return await _context.Rooms
+        return await _dbSet
             .AsNoTracking()
             .Include(r => r.RoomType)
-            .Where(r => r.IsActive)
-            .OrderBy(r => r.RoomNumber)
             .ToListAsync();
     }
 
-    public async Task<List<Room>> GetAvailableByTypeIdAndDateRangeAsync(int roomTypeId, DateTime checkInDate, DateTime checkOutDate)
+    public virtual async Task<Room?> GetByIdWithTypeAsync(int id)
     {
-        return await _context.Rooms
-            .AsNoTracking()
-            .Include(r => r.RoomType)
-            .Where(r =>
-                r.IsActive &&
-                r.RoomTypeId == roomTypeId &&
-                !_context.Bookings.Any(b =>
-                        b.RoomId == r.Id &&
-                        b.Status != BookingStatus.Cancelled &&
-                        b.Status != BookingStatus.CheckedOut &&
-                        checkInDate < b.CheckOutDate &&
-                        checkOutDate > b.CheckInDate))
-            .OrderBy(r => r.RoomNumber)
-            .ToListAsync();
-    }
-
-    public async Task<Room?> GetByIdWithTypeAsync(int id)
-    {
-        return await _context.Rooms
+        return await _dbSet
             .AsNoTracking()
             .Include(r => r.RoomType)
             .FirstOrDefaultAsync(r => r.Id == id);

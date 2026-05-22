@@ -11,11 +11,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 var dataSource = BuildDataSource(connectionString);
 
-// Configurar la conexión a PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(dataSource));
 
-// Capas de la aplicación (inyección de dependencia)
 AddApplicationDependencies(builder.Services);
 
 builder.Services.AddControllers();
@@ -44,20 +42,22 @@ static NpgsqlDataSource BuildDataSource(string connectionString)
 
 static void AddApplicationDependencies(IServiceCollection services)
 {
-    services.AddSingleton<IRoomTypePresetCreator, SimpleRoomTypePresetCreator>();
-    services.AddSingleton<IRoomTypePresetCreator, SuiteRoomTypePresetCreator>();
-    services.AddSingleton<IRoomTypePresetCreator, DoubleTwinRoomTypePresetCreator>();
-    services.AddSingleton<IRoomTypePresetCreator, DoubleMatrimonialRoomTypePresetCreator>();
-    services.AddScoped<IGuestRepository, GuestRepository>();
-    services.AddScoped<IGuestService, GuestService>();
-    services.AddScoped<IBookingRepository, BookingRepository>();
-    services.AddScoped<IBookingService, BookingService>();
-    services.AddScoped<IRoomRepository, RoomRepository>();
-    services.AddScoped<IRoomService, RoomService>();
-    services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
-    services.AddScoped<IRoomTypeService, RoomTypeService>();
-    services.AddScoped<IServiceContactRepository, ServiceContactRepository>();
-    services.AddScoped<IServiceContactService, ServiceContactService>();
+    services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+    services.AddScoped<GuestRepository>();
+    services.AddScoped<GuestService>();
+    
+    services.AddScoped<BookingRepository>();
+    services.AddScoped<BookingService>();
+    
+    services.AddScoped<RoomRepository>();
+    services.AddScoped<RoomService>();
+    
+    services.AddScoped<RoomTypeRepository>();
+    services.AddScoped<RoomTypeService>();
+    
+    services.AddScoped<ServiceContactRepository>();
+    services.AddScoped<ServiceContactService>();
 }
 
 static void ConfigureFrontendCors(CorsPolicyBuilder policy)

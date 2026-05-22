@@ -1,7 +1,7 @@
 import {bookingsService} from "../../services/bookingsService.js"
 
-const LATE_CANCELLATION_HOURS_THRESHOLD = 48;
-const LATE_CANCELLATION_RATE = 0.20;
+const LATE_CANCELLATION_HOURS_THRESHOLD = 24;
+const LATE_CANCELLATION_RATE = 1.00;
 
 class CheckInPage extends HTMLElement {
     constructor() {
@@ -72,8 +72,8 @@ class CheckInPage extends HTMLElement {
         } else if (actionButton.classList.contains("check-in__btn-cancel")) {
             const feePreview = this.calculateCancellationFeePreview(selectedBooking);
             const feeMessage = feePreview.applies
-                ? `Se cobrara una comision de ${this.formatMoney(feePreview.fee)} (20% de ${this.formatMoney(feePreview.referencePrice)}).`
-                : "No se cobrara comision (faltan 48 horas o mas para el check-in).";
+                ? `Se cobrara una comision de ${this.formatMoney(feePreview.fee)} (100% de 1 noche: ${this.formatMoney(feePreview.referencePrice)}).`
+                : "No se cobrara comision (faltan 24 horas o mas para el check-in).";
 
             confirmation = {
                 title: "Confirmar cancelacion",
@@ -150,6 +150,9 @@ class CheckInPage extends HTMLElement {
                 statusText = "Confirmada";
             }else if (booking.status.toLowerCase() === "cancelled") {
                 statusText = "Cancelada";
+                if (booking.cancellationFee !== undefined && booking.cancellationFee !== null) {
+                    statusText += ` - Comisión cobrada: $${booking.cancellationFee.toFixed(2)}`;
+                }
             }else if (booking.status.toLowerCase() === "checkedin") {
                 statusText = "Checked In";
             }else if (booking.status.toLowerCase() === "checkedout") {

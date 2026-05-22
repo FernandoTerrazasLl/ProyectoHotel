@@ -7,9 +7,9 @@ public class ServiceContactsController : ControllerBase
     private const string EmptyContactsMessage = "No hay contactos disponibles.";
     private const string ContactsSuccessMessage = "Contactos de servicios del hotel.";
 
-    private readonly IServiceContactService _serviceContactService;
+    private readonly ServiceContactService _serviceContactService;
 
-    public ServiceContactsController(IServiceContactService serviceContactService)
+    public ServiceContactsController(ServiceContactService serviceContactService)
     {
         _serviceContactService = serviceContactService;
     }

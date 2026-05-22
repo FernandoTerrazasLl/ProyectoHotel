@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class RoomTypesController : ControllerBase
 {
-    private readonly IRoomTypeService _roomTypeService;
+    private readonly RoomTypeService _roomTypeService;
 
-    public RoomTypesController(IRoomTypeService roomTypeService)
+    public RoomTypesController(RoomTypeService roomTypeService)
     {
         _roomTypeService = roomTypeService;
     }

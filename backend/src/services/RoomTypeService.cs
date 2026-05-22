@@ -1,8 +1,11 @@
-public class RoomTypeService : IRoomTypeService
-{
-    private readonly IRoomTypeRepository _roomTypeRepository;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-    public RoomTypeService(IRoomTypeRepository roomTypeRepository)
+public class RoomTypeService
+{
+    private readonly RoomTypeRepository _roomTypeRepository;
+
+    public RoomTypeService(RoomTypeRepository roomTypeRepository)
     {
         _roomTypeRepository = roomTypeRepository;
     }

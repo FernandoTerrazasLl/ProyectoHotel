@@ -1,17 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-public class RoomTypeRepository : IRoomTypeRepository
+public class RoomTypeRepository : Repository<RoomType>
 {
-    private readonly AppDbContext _context;
-
-    public RoomTypeRepository(AppDbContext context)
+    public RoomTypeRepository(AppDbContext context) : base(context)
     {
-        _context = context;
     }
 
-    public async Task<List<RoomType>> GetAllAsync()
+    public override async Task<List<RoomType>> GetAllAsync()
     {
-        return await _context.RoomTypes
+        return await _dbSet
             .AsNoTracking()
             .OrderBy(rt => rt.PricePerNight)
             .ToListAsync();

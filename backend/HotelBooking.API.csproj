@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="HotelBooking.Tests\**" />
+    <Content Remove="HotelBooking.Tests\**" />
+    <EmbeddedResource Remove="HotelBooking.Tests\**" />
+    <None Remove="HotelBooking.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">

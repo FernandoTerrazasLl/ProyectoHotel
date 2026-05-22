@@ -1,8 +1,11 @@
-public class ServiceContactService : IServiceContactService
-{
-    private readonly IServiceContactRepository _serviceContactRepository;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-    public ServiceContactService(IServiceContactRepository serviceContactRepository)
+public class ServiceContactService
+{
+    private readonly ServiceContactRepository _serviceContactRepository;
+
+    public ServiceContactService(ServiceContactRepository serviceContactRepository)
     {
         _serviceContactRepository = serviceContactRepository;
     }

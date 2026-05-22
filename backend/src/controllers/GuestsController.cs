@@ -6,9 +6,9 @@ public class GuestsController : ControllerBase
 {
     private const string GuestNotFoundMessage = "Huésped no encontrado.";
 
-    private readonly IGuestService _guestService;
+    private readonly GuestService _guestService;
 
-    public GuestsController(IGuestService guestService)
+    public GuestsController(GuestService guestService)
     {
         _guestService = guestService;
     }
@@ -35,10 +35,6 @@ public class GuestsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Guest>> Create([FromBody] GuestRegistrationRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
 
         var created = await _guestService.RegisterGuestAsync(request);
         if (!created.IsSuccess)

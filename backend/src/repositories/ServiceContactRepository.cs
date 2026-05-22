@@ -1,17 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-public class ServiceContactRepository : IServiceContactRepository
+public class ServiceContactRepository : Repository<ServiceContact>
 {
-    private readonly AppDbContext _context;
-
-    public ServiceContactRepository(AppDbContext context)
+    public ServiceContactRepository(AppDbContext context) : base(context)
     {
-        _context = context;
     }
 
-    public async Task<List<ServiceContact>> GetAllAsync()
+    public override async Task<List<ServiceContact>> GetAllAsync()
     {
-        return await _context.ServiceContacts
+        return await _dbSet
             .AsNoTracking()
             .OrderBy(sc => sc.ServiceName)
             .ToListAsync();
