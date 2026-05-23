@@ -120,4 +120,23 @@ public class BookingServiceTest
         Assert.That(booking.CheckInTime!.Value.Date, Is.EqualTo(DateTime.Now.Date));
         _mockBookingRepository.Verify(r => r.UpdateAsync(It.IsAny<Booking>()), Times.Once);
     }
+    [Test]
+    public static Task MapGuestsToDto(Booking booking)
+    {
+        return booking.GuestBookings
+            .Where(gb => gb.Guest != null)
+            .Select(gb => new BookingGuestDto
+            {
+                GuestId = gb.GuestId,
+                FirstName = gb.Guest!.FirstName,
+                LastName = gb.Guest.LastName,
+                FullName = $"{gb.Guest.FirstName} {gb.Guest.LastName}".Trim(),
+                DocumentType = gb.Guest.DocumentType,
+                DocumentId = gb.Guest.DocumentId,
+                IsMainGuest = gb.IsMainGuest
+            })
+            .OrderByDescending(g => g.IsMainGuest)
+            .ThenBy(g => g.GuestId)
+            .ToList();
+    }
 }
