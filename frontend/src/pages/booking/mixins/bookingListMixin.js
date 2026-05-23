@@ -1,4 +1,5 @@
 import { bookingsService } from "../../../services/bookingsService.js";
+import { formatRoomInfo } from "../../../utils/formatters.js";
 
 export const BookingListMixin = {
     async loadBookings() {
@@ -27,7 +28,7 @@ export const BookingListMixin = {
             const bookingElement = document.createElement("div");
             bookingElement.classList.add("booking__item");
 
-            let status ="";
+            let status;
             if (booking.status.toLowerCase() === "confirmed") {
                 status = "Confirmada";
             }else if (booking.status.toLowerCase() === "cancelled") {
@@ -44,7 +45,7 @@ export const BookingListMixin = {
                 <div class="booking__item-header">
                     <h2 class="booking__guest-name">${booking.mainGuestFullName}</h2>
                     <div class="booking__status-container"> 
-                        <p class="booking__room-info">Habitacion ${booking.roomNumber} - ${booking.roomTypeName} - $${booking.roomTypePricePerNight.toFixed(2)} - Numero huespedes: ${booking.numberGuests}</p>
+                        <p class="booking__room-info">${formatRoomInfo(booking)}</p>
                         <p class="booking__status-input">${status}</p>
                     </div>
                 </div>
@@ -61,7 +62,7 @@ export const BookingListMixin = {
     filterBookings(rawValue) {
         const value = rawValue.trim().toLowerCase();
         const listElement = this.querySelector(".booking__list");
-
+ 
         if (!value) {
             this.renderBookings(this.bookingsList, listElement);
             return;

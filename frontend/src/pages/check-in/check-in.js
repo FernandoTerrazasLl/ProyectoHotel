@@ -1,7 +1,7 @@
 import {bookingsService} from "../../services/bookingsService.js"
+import {formatCurrency, formatRoomInfo} from "../../utils/formatters.js"
+import {LATE_CANCELLATION_HOURS_THRESHOLD, LATE_CANCELLATION_RATE} from "../../config.js"
 
-const LATE_CANCELLATION_HOURS_THRESHOLD = 24;
-const LATE_CANCELLATION_RATE = 1.00;
 
 class CheckInPage extends HTMLElement {
     constructor() {
@@ -72,7 +72,7 @@ class CheckInPage extends HTMLElement {
         } else if (actionButton.classList.contains("check-in__btn-cancel")) {
             const feePreview = this.calculateCancellationFeePreview(selectedBooking);
             const feeMessage = feePreview.applies
-                ? `Se cobrara una comision de ${this.formatMoney(feePreview.fee)} (100% de 1 noche: ${this.formatMoney(feePreview.referencePrice)}).`
+                ? `Se cobrara una comision de ${formatCurrency(feePreview.fee)} (100% de 1 noche: ${formatCurrency(feePreview.referencePrice)}).`
                 : "No se cobrara comision (faltan 24 horas o mas para el check-in).";
 
             confirmation = {
@@ -145,26 +145,14 @@ class CheckInPage extends HTMLElement {
             const buttonText = status === "confirmed" ? "Check In" : "Check Out";
             const hiddenButton = status === "checkedin" ? "hidden" : "";
 
-            let statusText ="";
-            if (booking.status.toLowerCase() === "confirmed") {
-                statusText = "Confirmada";
-            }else if (booking.status.toLowerCase() === "cancelled") {
-                statusText = "Cancelada";
-                if (booking.cancellationFee !== undefined && booking.cancellationFee !== null) {
-                    statusText += ` - Comisión cobrada: $${booking.cancellationFee.toFixed(2)}`;
-                }
-            }else if (booking.status.toLowerCase() === "checkedin") {
-                statusText = "Checked In";
-            }else if (booking.status.toLowerCase() === "checkedout") {
-                statusText = "Checked Out";
-            }else {
-                statusText = "Desconocido";
-            }
+            // Smell 11 (Long Method): Extracted status text logic to getBookingStatusLabel helper method
+            const statusText = this.getBookingStatusLabel(booking.status, booking.cancellationFee);
+
             bookingElement.innerHTML = `
                 <div class="check-in__item-header">
                     <h2 class="check-in__guest-name">${booking.mainGuestFullName}</h2>
                     <div class="check-in__status-container"> 
-                        <p class="check-in__room-info">Habitacion ${booking.roomNumber} - ${booking.roomTypeName} - $${booking.roomTypePricePerNight.toFixed(2)} - Numero huespedes: ${booking.numberGuests}</p>
+                        <p class="check-in__room-info">${formatRoomInfo(booking)}</p>
                         <p class="check-in__status-input">${statusText}</p>
                     </div>
                 </div>
@@ -182,17 +170,40 @@ class CheckInPage extends HTMLElement {
         });
         listElement.appendChild(fragment);
     }
-    checkIn(BookingId){
-        const checkInPromise = bookingsService.checkIn(BookingId);
 
+    // Smell 11: Extracted helper to resolve cognitive complexity and long method smell
+    getBookingStatusLabel(status, cancellationFee) {
+        const normalizedStatus = status.toLowerCase();
+        if (normalizedStatus === "confirmed") {
+            return "Confirmada";
+        }
+        if (normalizedStatus === "cancelled") {
+            let label = "Cancelada";
+            if (cancellationFee !== undefined && cancellationFee !== null) {
+                label += ` - Comisión cobrada: ${formatCurrency(cancellationFee)}`;
+            }
+            return label;
+        }
+        if (normalizedStatus === "checkedin") {
+            return "Checked In";
+        }
+        if (normalizedStatus === "checkedout") {
+            return "Checked Out";
+        }
+        return "Desconocido";
+    }
+
+    // Smell 4, 5, 6: Renamed C#-style parameter BookingId to bookingId
+    checkIn(bookingId){
+        const checkInPromise = bookingsService.checkIn(bookingId);
         return checkInPromise;
     }
-    checkOut(BookingId){
-        const checkOutPromise = bookingsService.checkOut(BookingId);
+    checkOut(bookingId){
+        const checkOutPromise = bookingsService.checkOut(bookingId);
         return checkOutPromise;
     }
-    cancel(BookingId){
-        const cancelPromise = bookingsService.cancel(BookingId);
+    cancel(bookingId){
+        const cancelPromise = bookingsService.cancel(bookingId);
         return cancelPromise;
     }
 
@@ -210,21 +221,13 @@ class CheckInPage extends HTMLElement {
 
         const hoursBeforeCheckIn = (checkInDate.getTime() - Date.now()) / (1000 * 60 * 60);
         const applies = hoursBeforeCheckIn < LATE_CANCELLATION_HOURS_THRESHOLD;
-        const fee = applies ? this.roundMoney(referencePrice * LATE_CANCELLATION_RATE) : 0;
+        const fee = applies ? (referencePrice * LATE_CANCELLATION_RATE) : 0;
 
         return {
             applies,
             fee,
             referencePrice,
         };
-    }
-
-    roundMoney(value) {
-        return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
-    }
-
-    formatMoney(value) {
-        return `$${this.roundMoney(value).toFixed(2)}`;
     }
 }
 

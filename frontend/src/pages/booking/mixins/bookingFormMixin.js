@@ -2,6 +2,7 @@ import { roomTypesService } from "../../../services/roomTypesService.js";
 import { roomsService } from "../../../services/roomsService.js";
 import { guestsService } from "../../../services/guestsService.js";
 import { bookingsService } from "../../../services/bookingsService.js";
+import { formatCurrency } from "../../../utils/formatters.js";
 
 export const BookingFormMixin = {
     form() {
@@ -12,7 +13,7 @@ export const BookingFormMixin = {
         const roomTypeSelect = this.querySelector('select[name="roomType"]');
         const checkInInput = this.querySelector('input[name="checkInDate"]');
         const checkOutInput = this.querySelector('input[name="checkOutDate"]');
-
+ 
         if (!createBtn || !formBackground || !cancelBtn || !formElement || !roomTypeSelect || !checkInInput || !checkOutInput) {
             return;
         }
@@ -78,7 +79,7 @@ export const BookingFormMixin = {
         roomTypes.forEach((roomType) => {
             const option = document.createElement("option");
             option.value = roomType.id;
-            option.textContent = `${roomType.name} - $${roomType.pricePerNight.toFixed(2)} - Capacidad: ${roomType.capacity}`;
+            option.textContent = `${roomType.name} - ${formatCurrency(roomType.pricePerNight)} - Capacidad: ${roomType.capacity}`;
             fragment.appendChild(option);
         });
         roomSelect.appendChild(fragment);

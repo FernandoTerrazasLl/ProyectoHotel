@@ -1,5 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
+/* Components */
 @import "./components/nav/nav.css";
+@import "./components/confirm_dialog/confirm_dialog.css";
+@import "./components/not_found/not_found.css";
+
+/* Pages */
+@import "./pages/booking/booking.css";
+@import "./pages/check-in/check-in.css";
+@import "./pages/customer/customer.css";
+@import "./pages/services/services.css";
 
 *{
 	font-family: "Inter", sans-serif;

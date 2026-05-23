@@ -19,7 +19,7 @@ export const Router = {
         const section = document.createElement(sectionId);
 
         const main = document.querySelector(".main");
-        if (!main) return;
+        if (!main) {return;}
 
         main.firstElementChild?.remove();
         main.appendChild(section);
@@ -31,11 +31,11 @@ export const Router = {
     init() {
         document.addEventListener("click", (event) => {
             const link = event.target.closest("a");
-            if (!link) return;
-            if (link.target === "_blank" || link.rel === "external") return;
+            if (!link) {return;}
+            if (link.target === "_blank" || link.rel === "external") {return;}
 
             const href = link.getAttribute("href");
-            if (!href || !href.startsWith("/")) return;
+            if (!href || !href.startsWith("/")) {return;}
 
             event.preventDefault();
             this.go(href);
