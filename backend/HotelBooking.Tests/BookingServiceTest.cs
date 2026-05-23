@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
+
 
 [TestFixture]
 public class BookingServiceTest
@@ -121,22 +123,26 @@ public class BookingServiceTest
         _mockBookingRepository.Verify(r => r.UpdateAsync(It.IsAny<Booking>()), Times.Once);
     }
     [Test]
-    public static Task MapGuestsToDto(Booking booking)
+    public static async Task MapGuestsToDto_BookingCorrecto_retornoExitoso()
     {
-        return booking.GuestBookings
-            .Where(gb => gb.Guest != null)
-            .Select(gb => new BookingGuestDto
-            {
-                GuestId = gb.GuestId,
-                FirstName = gb.Guest!.FirstName,
-                LastName = gb.Guest.LastName,
-                FullName = $"{gb.Guest.FirstName} {gb.Guest.LastName}".Trim(),
-                DocumentType = gb.Guest.DocumentType,
-                DocumentId = gb.Guest.DocumentId,
-                IsMainGuest = gb.IsMainGuest
-            })
-            .OrderByDescending(g => g.IsMainGuest)
-            .ThenBy(g => g.GuestId)
-            .ToList();
+
+        // arrange
+        var today = DateTime.Today;
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 2,
+            CheckInDate = today,
+            CheckOutDate = today.AddDays(2),
+            NumberGuests = 3,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = today
+        };
+
+        //act
+        var resultado = BookingService.MapGuestsToDto(booking);
+
+        //Assert
+        Assert.That(resultado, Is.Not.Null);
     }
 }

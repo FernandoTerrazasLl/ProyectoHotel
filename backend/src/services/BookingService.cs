@@ -402,7 +402,7 @@ public class BookingService
             .ToList();
     }
 
-    private static List<BookingGuestDto> MapGuestsToDto(Booking booking)//arreglado esto
+    public static List<BookingGuestDto> MapGuestsToDto(Booking booking)//arreglado esto
     {
         return booking.GuestBookings
             .Where(gb => gb.Guest != null)
