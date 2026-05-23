@@ -1,0 +1,10 @@
+{
+  "name": "hotel-booking-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "dotnet test HotelBooking.Tests/HotelBooking.Tests.csproj",
+    "test:coverage": "dotnet test HotelBooking.Tests/HotelBooking.Tests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./coverage/coverage.cobertura.xml && dotnet reportgenerator -reports:HotelBooking.Tests/coverage/coverage.cobertura.xml -targetdir:HotelBooking.Tests/coverage/report -reporttypes:Html",
+    "test:coverage:empty": "dotnet test HotelBooking.Tests/HotelBooking.Tests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./coverage/coverage.cobertura.xml /p:Exclude=\"[HotelBooking.API]*\" && dotnet reportgenerator -reports:HotelBooking.Tests/coverage/coverage.cobertura.xml -targetdir:HotelBooking.Tests/coverage/report -reporttypes:Html"
+  }
+}

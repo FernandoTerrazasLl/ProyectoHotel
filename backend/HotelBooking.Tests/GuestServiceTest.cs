@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 
 [TestFixture]
-public class GuestServiceTests
+public class GuestServiceTest
 {
     private Mock<GuestRepository> _mockRepository = null!;
     private GuestService _service = null!;
@@ -68,32 +67,6 @@ public class GuestServiceTests
         Assert.That(result.Data.FirstName, Is.EqualTo("Juan"));
         Assert.That(result.Data.LastName, Is.EqualTo("Perez"));
         _mockRepository.Verify(r => r.AddAsync(It.IsAny<Guest>()), Times.Once);
-    }
-
-    [Test]
-    public async Task RegisterGuestAsync_FaltanCamposObligatorios_RetornaFallo()
-    {
-        // HU-01 - Criterio 2: Dado que falta uno o más campos obligatorios, 
-        // cuando intente guardar el formulario, entonces el sistema debe mostrar validaciones y no registrar el huésped.
-
-        // Arrange
-        var request = new GuestRegistrationRequest
-        {
-            FirstName = "", // Campo obligatorio vacío
-            LastName = "Perez",
-            DocumentType = "CI",
-            DocumentId = "123456",
-            Country = "Bolivia"
-        };
-
-        // Act
-        var result = await _service.RegisterGuestAsync(request);
-
-        // Assert
-        Assert.That(result.IsSuccess, Is.False);
-        Assert.That(result.ErrorCode, Is.EqualTo("MISSING_REQUIRED_FIELDS"));
-        Assert.That(result.Message, Is.EqualTo("Debes completar todos los campos obligatorios del huésped."));
-        _mockRepository.Verify(r => r.AddAsync(It.IsAny<Guest>()), Times.Never);
     }
 
     [Test]

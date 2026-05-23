@@ -6,6 +6,13 @@ using System.Linq;
 
 public class RoomService
 {
+    public const string InvalidRoomTypeIdCode = "INVALID_ROOM_TYPE_ID";
+    public const string InvalidRoomTypeIdMessage = "El id del tipo de habitación debe ser mayor a 0.";
+    public const string PastDateCode = "PAST_DATE";
+    public const string PastDateMessage = "No se permiten fechas en el pasado.";
+    public const string InvalidDateRangeCode = "INVALID_DATE_RANGE";
+    public const string InvalidDateRangeMessage = "La fecha de check-out debe ser mayor a la fecha de check-in.";
+
     private readonly RoomRepository _roomRepository;
     private readonly BookingRepository _bookingRepository;
 
@@ -60,7 +67,7 @@ public class RoomService
     {
         if (roomTypeId <= 0)
         {
-            return OperationResult<(DateTime CheckInDate, DateTime CheckOutDate)>.Failure("INVALID_ROOM_TYPE_ID", "El id del tipo de habitación debe ser mayor a 0.");
+            return OperationResult<(DateTime CheckInDate, DateTime CheckOutDate)>.Failure(InvalidRoomTypeIdCode, InvalidRoomTypeIdMessage);
         }
 
         var normalizedCheckInDate = checkInDate.Date;
@@ -69,12 +76,12 @@ public class RoomService
 
         if (normalizedCheckInDate < today || normalizedCheckOutDate < today)
         {
-            return OperationResult<(DateTime CheckInDate, DateTime CheckOutDate)>.Failure("PAST_DATE", "No se permiten fechas en el pasado.");
+            return OperationResult<(DateTime CheckInDate, DateTime CheckOutDate)>.Failure(PastDateCode, PastDateMessage);
         }
 
         if (normalizedCheckInDate >= normalizedCheckOutDate)
         {
-            return OperationResult<(DateTime CheckInDate, DateTime CheckOutDate)>.Failure("INVALID_DATE_RANGE", "La fecha de check-out debe ser mayor a la fecha de check-in.");
+            return OperationResult<(DateTime CheckInDate, DateTime CheckOutDate)>.Failure(InvalidDateRangeCode, InvalidDateRangeMessage);
         }
 
         return OperationResult<(DateTime CheckInDate, DateTime CheckOutDate)>.Success((normalizedCheckInDate, normalizedCheckOutDate));

@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 
 [TestFixture]
-public class BookingServiceTests
+public class BookingServiceTest
 {
     private Mock<BookingRepository> _mockBookingRepository = null!;
     private Mock<GuestRepository> _mockGuestRepository = null!;
@@ -73,7 +72,6 @@ public class BookingServiceTests
             }
         };
 
-        // Mock checking guest existence: we return 3 existing guests
         var allGuests = new List<Guest>
         {
             new Guest { Id = 1 },
@@ -81,8 +79,6 @@ public class BookingServiceTests
             new Guest { Id = 3 }
         };
         _mockGuestRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(allGuests);
-
-        // Mock RoomRepository to return the room with simple type (capacity 2)
         _mockRoomRepository.Setup(r => r.GetByIdWithTypeAsync(101)).ReturnsAsync(mockRoom);
 
         // Act
@@ -93,5 +89,35 @@ public class BookingServiceTests
         Assert.That(result.ErrorCode, Is.EqualTo("CAPACITY_EXCEEDED"));
         Assert.That(result.Message, Is.EqualTo("La cantidad de personas supera la capacidad de la habitación."));
         _mockBookingRepository.Verify(r => r.AddWithGuestsAsync(It.IsAny<Booking>(), It.IsAny<IEnumerable<GuestBooking>>()), Times.Never);
+    }
+
+    [Test]
+    public async Task CheckInAsync_ReservaVigenteFechaCorrespondiente_RegistraFechaHoraIngreso()
+    {
+        // HU-04 - Criterio 1: Dado que existe una reserva vigente para la fecha correspondiente, 
+        // cuando el usuario ejecute el check-in, entonces el sistema debe registrar la fecha y hora de ingreso.
+
+        // Arrange
+        var today = DateTime.Today;
+        var booking = new Booking
+        {
+            Id = 1,
+            CheckInDate = today, // Vigente hoy
+            CheckOutDate = today.AddDays(2),
+            Status = BookingStatus.Confirmed
+        };
+
+        _mockBookingRepository.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(booking);
+        _mockBookingRepository.Setup(r => r.GetByIdWithDetailsAsync(1)).ReturnsAsync(booking);
+        _mockBookingRepository.Setup(r => r.UpdateAsync(It.IsAny<Booking>())).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _service.CheckInAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(booking.CheckInTime, Is.Not.Null);
+        Assert.That(booking.CheckInTime!.Value.Date, Is.EqualTo(DateTime.Now.Date));
+        _mockBookingRepository.Verify(r => r.UpdateAsync(It.IsAny<Booking>()), Times.Once);
     }
 }
