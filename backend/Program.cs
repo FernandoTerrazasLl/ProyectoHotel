@@ -6,6 +6,8 @@ const string FrontendPolicyName = "FrontendPolicy";
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls($"http://*:8080");
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("La cadena de conexión 'DefaultConnection' no está configurada.");
 
@@ -43,19 +45,14 @@ static NpgsqlDataSource BuildDataSource(string connectionString)
 static void AddApplicationDependencies(IServiceCollection services)
 {
     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-
     services.AddScoped<GuestRepository>();
     services.AddScoped<GuestService>();
-    
     services.AddScoped<BookingRepository>();
     services.AddScoped<BookingService>();
-    
     services.AddScoped<RoomRepository>();
     services.AddScoped<RoomService>();
-    
     services.AddScoped<RoomTypeRepository>();
     services.AddScoped<RoomTypeService>();
-    
     services.AddScoped<ServiceContactRepository>();
     services.AddScoped<ServiceContactService>();
 }
@@ -63,7 +60,12 @@ static void AddApplicationDependencies(IServiceCollection services)
 static void ConfigureFrontendCors(CorsPolicyBuilder policy)
 {
     policy
-        .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:3000", "https://hotel-front-production.up.railway.app")
+        .WithOrigins(
+            "http://127.0.0.1:5500", 
+            "http://localhost:5500", 
+            "http://localhost:3000",
+            "https://hotel-front-production.up.railway.app"
+         )
         .AllowAnyHeader()
         .AllowAnyMethod();
 }
