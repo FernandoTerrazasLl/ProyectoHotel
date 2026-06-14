@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = "http://localhost:5256";
+const DEFAULT_API_BASE_URL = "https://proyectohotel-production-4116.up.railway.app";
 
 function buildApiUrl(path) {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
