@@ -63,7 +63,7 @@ static void AddApplicationDependencies(IServiceCollection services)
 static void ConfigureFrontendCors(CorsPolicyBuilder policy)
 {
     policy
-        .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:3000")
+        .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:3000", "https://hotel-front-production.up.railway.app")
         .AllowAnyHeader()
         .AllowAnyMethod();
 }
