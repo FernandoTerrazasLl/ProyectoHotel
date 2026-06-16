@@ -75,4 +75,22 @@ public class ServiceContactServiceTest
         Assert.That(result[0].Responsible, Is.EqualTo("Maria Lopez"));
         Assert.That(result[0].Phone, Is.EqualTo("77777777"));
     }
+
+    [Test]
+    public async Task GetAllContactsAsync_SinContactos_RetornaListaVacia()
+    {
+        // HU-06 - Visualizar contactos de servicios del hotel
+        // CA 3: Dado que no existe información cargada, cuando se abra la página, entonces
+        // el sistema debe informar que no hay contactos disponibles.
+
+        // Arrange
+        // No agregamos nada a la base de datos en memoria
+
+        // Act
+        var result = await _service.GetAllContactsAsync();
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Count, Is.EqualTo(0));
+    }
 }

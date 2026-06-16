@@ -53,4 +53,21 @@ describe('serviceContactsService', () => {
         expect(result[0].responsible).toBe('Maria Lopez');
         expect(result[0].phone).toBe('77777777');
     });
+
+    it('getAll_sinContactos_retornaListaVacia', async () => {
+        // HU-06 - Visualizar contactos de servicios del hotel
+        // CA 3: Dado que no existe información cargada, cuando se abra la página, entonces
+        // el sistema debe informar que no hay contactos disponibles.
+        
+        // Arrange
+        const mockContacts = [];
+        apiClient.apiRequest.mockResolvedValue(mockContacts);
+
+        // Act
+        const result = await serviceContactsService.getAll();
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/ServiceContacts');
+        expect(result).toEqual(mockContacts);
+    });
 });
