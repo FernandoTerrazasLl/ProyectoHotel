@@ -756,6 +756,147 @@ public class BookingServiceTest
         Assert.That(result.IsSuccess, Is.False);
         Assert.That(result.ErrorCode, Is.EqualTo("CHECKIN_IN_PAST"));
     }
+        [Test]
+    public async Task CreateBookingAsync_SinHuespedes_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int>(),
+            MainGuestId = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 0
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("GUESTS_REQUIRED"));
+    }
+
+    [Test]
+    public async Task CreateBookingAsync_HuespedesDuplicados_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1, 1 },
+            MainGuestId = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 2
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("DUPLICATE_GUESTS"));
+    }
+
+    [Test]
+    public async Task CreateBookingAsync_HuespedPrincipalInvalido_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 2,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("MAIN_GUEST_INVALID"));
+    }
+
+    [Test]
+    public async Task CreateBookingAsync_HuespedNoExiste_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 999 },
+            MainGuestId = 999,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("GUEST_NOT_FOUND"));
+    }
+
+    [Test]
+    public async Task CreateBookingAsync_HabitacionNoExiste_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 1,
+            RoomId = 999,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("ROOM_NOT_FOUND"));
+    }
+
+    [Test]
+    public async Task CreateBookingAsync_HabitacionInactiva_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var inactiveRoom = new Room { Id = 2, RoomNumber = "102", RoomTypeId = 1, Floor = 1, IsActive = false };
+        await _context.Rooms.AddAsync(inactiveRoom);
+        await _context.SaveChangesAsync();
+
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 1,
+            RoomId = 2,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("ROOM_NOT_AVAILABLE"));
+    }
 
     private async Task SeedBaseDataAsync()
     {
