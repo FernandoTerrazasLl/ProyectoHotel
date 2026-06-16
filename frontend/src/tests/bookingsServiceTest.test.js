@@ -315,4 +315,26 @@ describe('bookingsService', () => {
         expect(result.roomTypeCapacity).toBe(4);
         expect(result.roomTypePricePerNight).toBe(250);
     });
+
+    it('create_sinVariacionValida_retornaFallo', async () => {
+        // HU-05 - Gestionar variación de tipo de habitación en la reserva
+        // CA 5: Dado que se intente registrar una reserva sin una variación válida de
+        // habitación, cuando se procese el formulario, entonces el sistema debe
+        // impedir el guardado y mostrar una validación.
+        
+        // Arrange
+        const payload = createValidPayload();
+        const mockResponse = { isSuccess: false, errorCode: 'ROOM_TYPE_NOT_FOUND', message: 'La habitación no tiene una variación válida asociada.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.create(payload);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings', {
+            method: 'POST',
+            body: payload
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

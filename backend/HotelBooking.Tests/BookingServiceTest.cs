@@ -213,6 +213,45 @@ public class BookingServiceTest
     }
 
     [Test]
+    public async Task CreateBookingAsync_SinVariacionValida_RetornaFallo()
+    {
+        // HU-05 - Gestionar variación de tipo de habitación en la reserva
+        // CA 5: Dado que se intente registrar una reserva sin una variación válida de
+        // habitación, cuando se procese el formulario, entonces el sistema debe
+        // impedir el guardado y mostrar una validación.
+
+        // Arrange
+        await SeedBaseDataAsync();
+        var roomWithoutType = new Room
+        {
+            Id = 2,
+            RoomNumber = "102",
+            RoomTypeId = 999, // ID de RoomType no existente
+            Floor = 1,
+            IsActive = true
+        };
+        await _context.Rooms.AddAsync(roomWithoutType);
+        await _context.SaveChangesAsync();
+
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 1,
+            RoomId = 2, // Habitación sin variación válida
+            CheckInDate = DateTime.Now.AddDays(2),
+            CheckOutDate = DateTime.Now.AddDays(5),
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("ROOM_TYPE_NOT_FOUND"));
+    }
+
+    [Test]
     public async Task GetBookingByIdAsync_VisualizaReserva_MuestraInformacionVariacionElegida()
     {
         // HU-05 - Gestionar variación de tipo de habitación en la reserva
