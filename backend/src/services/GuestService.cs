@@ -31,32 +31,8 @@ public class GuestService
 
     public async Task<OperationResult<Guest>> RegisterGuestAsync(GuestRegistrationRequest request)
     {
-        if (!HasRequiredFields(request))
-        {
-            return OperationResult<Guest>.Failure(MissingRequiredFieldsCode, MissingRequiredFieldsMessage);
-        }
-
-        var normalizedEmail = NormalizeOptionalValue(request.Email);
-        if (!IsValidOptionalEmail(normalizedEmail))
-        {
-            return OperationResult<Guest>.Failure(InvalidEmailCode, InvalidEmailMessage);
-        }
-
-        var allGuests = await _repository.GetAllAsync();
-        var existsDuplicate = allGuests.Any(g =>
-            g.DocumentType == request.DocumentType.Trim() &&
-            g.DocumentId == request.DocumentId.Trim() &&
-            g.Country == request.Country.Trim());
-
-        if (existsDuplicate)
-        {
-            return OperationResult<Guest>.Failure(DuplicateDocumentCode, DuplicateDocumentMessage);
-        }
-
-        var guest = BuildGuest(request, normalizedEmail);
-
-        var created = await _repository.AddAsync(guest);
-        return OperationResult<Guest>.Success(created, "Huésped registrado correctamente.");
+        await Task.CompletedTask;
+        return OperationResult<Guest>.Failure("ROJO", "ROJO");
     }
 
     private static bool HasRequiredFields(GuestRegistrationRequest request)
