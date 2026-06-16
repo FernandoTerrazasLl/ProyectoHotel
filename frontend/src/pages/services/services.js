@@ -25,7 +25,7 @@ class ServicesPage extends HTMLElement {
 
     async load_db_services(){
         const serviceListElement = this.querySelector(".services__list");
-        let serviceContacts = await serviceContactsService.getAll();
+        const serviceContacts = await serviceContactsService.getAll();
 
         if(!serviceContacts || serviceContacts.length === 0){
             serviceListElement.innerHTML = `
