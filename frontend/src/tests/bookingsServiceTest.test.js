@@ -9,6 +9,15 @@ describe('bookingsService', () => {
         vi.clearAllMocks();
     });
 
+    const createValidPayload = () => ({
+        guestIds: [1],
+        mainGuestId: 1,
+        roomId: 1,
+        checkInDate: '2026-06-20T14:00:00Z',
+        checkOutDate: '2026-06-25T10:00:00Z',
+        numberGuests: 1
+    });
+
     it('create_camposCompletos_registroCorrecto', async () => {
         // HU-02 - Crear reserva de habitación
         // CA 1: Dado que existen huéspedes y habitaciones precargadas, cuando el usuario
@@ -16,15 +25,34 @@ describe('bookingsService', () => {
         // registrarla correctamente.
         
         // Arrange
-        const payload = {
-            guestIds: [1],
-            mainGuestId: 1,
-            roomId: 1,
-            checkInDate: '2026-06-20T14:00:00Z',
-            checkOutDate: '2026-06-25T10:00:00Z',
-            numberGuests: 1
-        };
+        const payload = createValidPayload();
         const mockResponse = { isSuccess: true, data: { id: 1, ...payload } };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.create(payload);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings', {
+            method: 'POST',
+            body: payload
+        });
+        expect(result).toEqual(mockResponse);
+    });
+
+    it('create_fechaSalidaMenorOIgualIngreso_retornaFallo', async () => {
+        // HU-02 - Crear reserva de habitación
+        // CA 2: Dado que la fecha de salida no es posterior a la fecha de ingreso, cuando se
+        // intente guardar la reserva, entonces el sistema debe impedir el registro y
+        // mostrar una validación.
+        
+        // Arrange
+        const payload = {
+            ...createValidPayload(),
+            checkInDate: '2026-06-20T14:00:00Z',
+            checkOutDate: '2026-06-20T14:00:00Z' // Salida igual a ingreso
+        };
+        const mockResponse = { isSuccess: false, errorCode: 'INVALID_DATE_RANGE', message: 'La fecha de salida debe ser posterior a la fecha de ingreso.' };
         apiClient.apiRequest.mockResolvedValue(mockResponse);
 
         // Act
