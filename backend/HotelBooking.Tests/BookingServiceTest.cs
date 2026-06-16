@@ -181,6 +181,50 @@ public class BookingServiceTest
         Assert.That(bookingsInDb.Count, Is.EqualTo(0), "No debería guardarse ninguna reserva en la base de datos");
     }
 
+    [Test]
+    public async Task GetActiveAndFutureBookingsAsync_ReservasRegistradas_RetornaReservas()
+    {
+        // HU-03 - Consultar reservas activas y futuras
+        // CA 1: Dado que existen reservas registradas, cuando el usuario ingrese al listado,
+        // entonces el sistema debe mostrar las reservas activas y futuras con sus datos
+        // principales.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        // 1. Registrar una reserva en el futuro
+        var booking = new Booking
+        {
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        
+        // 2. Asociar el huésped a la reserva
+        var guestBooking = new GuestBooking
+        {
+            Booking = booking,
+            GuestId = 1,
+            IsMainGuest = true
+        };
+        await _context.GuestBookings.AddAsync(guestBooking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetActiveAndFutureBookingsAsync();
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True, "Debería retornar exitoso");
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Count, Is.EqualTo(1), "Debería retornar exactamente 1 reserva en la agenda");
+        Assert.That(result.Data[0].RoomNumber, Is.EqualTo("101"), "La habitación listada debería ser 101");
+        Assert.That(result.Data[0].MainGuestFullName, Is.EqualTo("Juan Perez"), "El huésped principal debería ser Juan Perez");
+    }
+
     private async Task SeedBaseDataAsync()
     {
         // 1. Precargar Huésped

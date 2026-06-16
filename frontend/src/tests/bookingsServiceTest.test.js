@@ -112,4 +112,24 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('getAgenda_reservasRegistradas_retornaReservas', async () => {
+        // HU-03 - Consultar reservas activas y futuras
+        // CA 1: Dado que existen reservas registradas, cuando el usuario ingrese al listado,
+        // entonces el sistema debe mostrar las reservas activas y futuras con sus datos
+        // principales.
+        
+        // Arrange
+        const mockBookings = [
+            { id: 1, roomId: 1, roomNumber: '101', roomTypeName: 'Simple', checkInDate: '2026-06-20T14:00:00Z', checkOutDate: '2026-06-25T10:00:00Z', status: 'Confirmed' }
+        ];
+        apiClient.apiRequest.mockResolvedValue(mockBookings);
+
+        // Act
+        const result = await bookingsService.getAgenda();
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings/agenda');
+        expect(result).toEqual(mockBookings);
+    });
 });
