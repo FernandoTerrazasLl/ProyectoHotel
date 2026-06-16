@@ -190,4 +190,24 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('checkIn_reservaCancelada_retornaFallo', async () => {
+        // HU-04 - Registrar check-in
+        // CA 2: Dado que la reserva está cancelada, cuando se intente hacer check-in,
+        // entonces el sistema debe impedir la operación.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = { isSuccess: false, errorCode: 'BOOKING_CANCELLED', message: 'No es posible hacer check-in de una reserva cancelada.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.checkIn(bookingId);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/check-in`, {
+            method: 'POST'
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

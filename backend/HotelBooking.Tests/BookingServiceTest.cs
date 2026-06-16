@@ -333,6 +333,47 @@ public class BookingServiceTest
         Assert.That(result.Data.CheckInTime!.Value.Date, Is.EqualTo(DateTime.Today), "La fecha de check-in debe ser la de hoy");
     }
 
+    [Test]
+    public async Task CheckInAsync_ReservaCancelada_RetornaFallo()
+    {
+        // HU-04 - Registrar check-in
+        // CA 2: Dado que la reserva está cancelada, cuando se intente hacer check-in,
+        // entonces el sistema debe impedir la operación.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        // 1. Registrar una reserva cancelada
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today,
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.Cancelled,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        
+        // 2. Asociar el huésped
+        var guestBooking = new GuestBooking
+        {
+            BookingId = 1,
+            GuestId = 1,
+            IsMainGuest = true
+        };
+        await _context.GuestBookings.AddAsync(guestBooking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckInAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False, "El check-in debería ser rechazado");
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_CANCELLED"), "Debería retornar error de reserva cancelada");
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest
