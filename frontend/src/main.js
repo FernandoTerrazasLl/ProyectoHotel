@@ -1,4 +1,4 @@
-import {Router} from "./services/router.js";
+import {Router} from "./utils/router.js";
 import './pages/booking/booking.js';
 import './components/nav/nav.js';
 import './pages/customer/customer.js';

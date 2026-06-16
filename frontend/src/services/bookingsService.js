@@ -1,4 +1,4 @@
-import { apiRequest } from "./apiClient.js";
+import { apiRequest } from "../utils/apiClient.js";
 
 const BASE_PATH = "/api/Bookings";
 
