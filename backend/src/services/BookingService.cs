@@ -183,7 +183,7 @@ public class BookingService
         var room = await _roomRepository.GetByIdWithTypeAsync(booking.RoomId);
         var referencePrice = room?.RoomType?.PricePerNight ?? 0m;
 
-        var strategy = CancellationFeeStrategyFactory.GetStrategy(CancellationFeeStrategyFactory.StrictPolicyCode);
+        var strategy = CancellationFeeStrategyFactory.GetStrategy(CancellationFeeStrategyFactory.FlexiblePolicyCode);
         booking.CancellationFee = strategy.CalculateFee(booking.CheckInDate, DateTime.Now, referencePrice);
 
         booking.Status = BookingStatus.Cancelled;

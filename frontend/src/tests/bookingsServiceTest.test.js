@@ -359,4 +359,33 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('cancel_suficienteAnticipacion_cancelaSinMora', async () => {
+        // HU-07 - Cancelar reserva con mora simple
+        // CA 2: Dado que la cancelación se realiza con suficiente anticipación, cuando se
+        // procese la operación, entonces la reserva debe quedar cancelada sin mora.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = {
+            isSuccess: true,
+            data: {
+                id: bookingId,
+                status: 'Cancelled',
+                cancellationFee: 0
+            }
+        };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.cancel(bookingId, true);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/cancel`, {
+            method: 'POST',
+            body: { confirmCancellation: true }
+        });
+        expect(result.data.status).toBe('Cancelled');
+        expect(result.data.cancellationFee).toBe(0);
+    });
 });

@@ -601,6 +601,40 @@ public class BookingServiceTest
         Assert.That(result.ErrorCode, Is.EqualTo("CANCELLATION_NOT_CONFIRMED"));
     }
 
+    [Test]
+    public async Task CancelBookingAsync_SuficienteAnticipacion_CancelaSinMora()
+    {
+        // HU-07 - Cancelar reserva con mora simple
+        // CA 2: Dado que la cancelación se realiza con suficiente anticipación, cuando se
+        // procese la operación, entonces la reserva debe quedar cancelada sin mora.
+
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Now.AddDays(2), // 48 horas de anticipación
+            CheckOutDate = DateTime.Now.AddDays(5),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        var request = new CancelBookingRequest { ConfirmCancellation = true };
+
+        // Act
+        var result = await _service.CancelBookingAsync(1, request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Status, Is.EqualTo(BookingStatus.Cancelled));
+        Assert.That(result.Data.CancellationFee, Is.EqualTo(0m));
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest
