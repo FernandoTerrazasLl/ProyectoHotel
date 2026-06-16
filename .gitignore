@@ -478,7 +478,13 @@ $RECYCLE.BIN/
 *.msp
 
 # Windows shortcuts
-*.lnk
-
-# Vim temporary swap files
 *.swp
+
+# Code coverage reports
+coverage/
+**/coverage/
+
+# Code quality and error reports
+*eslint-report.html
+*roslyn-report.html
+*.sarif
