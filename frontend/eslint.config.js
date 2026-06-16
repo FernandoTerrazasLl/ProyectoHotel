@@ -26,11 +26,15 @@ export default [
       }
     },
     rules: {
-      "no-unused-vars": "warn",
-      "no-undef": "warn",
-      "eqeqeq": "warn",
-      "curly": "warn",
-      "no-console": "off"
+      "no-unused-vars": "error",
+      "no-undef": "error",
+      "eqeqeq": "error",
+      "curly": "error",
+      "no-console": "warn",
+      "semi": ["error", "always"],
+      "quotes": ["error", "double"],
+      "prefer-const": "error",
+      "no-var": "error"
     }
   }
 ];
