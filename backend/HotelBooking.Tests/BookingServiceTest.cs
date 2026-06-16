@@ -288,6 +288,51 @@ public class BookingServiceTest
         Assert.That(result.Data.Count, Is.EqualTo(0), "La lista de reservas debería estar vacía");
     }
 
+    [Test]
+    public async Task CheckInAsync_ReservaVigente_RegistraCorrectamente()
+    {
+        // HU-04 - Registrar check-in
+        // CA 1: Dado que existe una reserva vigente para la fecha correspondiente, cuando el
+        // usuario ejecute el check-in, entonces el sistema debe registrar la fecha y hora
+        // de ingreso.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        // 1. Registrar una reserva vigente (iniciando hoy y saliendo en 2 días)
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today,
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        
+        // 2. Asociar el huésped
+        var guestBooking = new GuestBooking
+        {
+            BookingId = 1,
+            GuestId = 1,
+            IsMainGuest = true
+        };
+        await _context.GuestBookings.AddAsync(guestBooking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckInAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True, "El check-in debería registrarse con éxito");
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Status, Is.EqualTo(BookingStatus.CheckedIn), "El estado de la reserva debe cambiar a CheckedIn");
+        Assert.That(result.Data.CheckInTime, Is.Not.Null, "La hora de check-in debe registrarse");
+        Assert.That(result.Data.CheckInTime!.Value.Date, Is.EqualTo(DateTime.Today), "La fecha de check-in debe ser la de hoy");
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest

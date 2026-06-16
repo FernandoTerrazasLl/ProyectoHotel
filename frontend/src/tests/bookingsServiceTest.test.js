@@ -169,4 +169,25 @@ describe('bookingsService', () => {
         expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings/agenda');
         expect(result).toEqual(mockBookings);
     });
+
+    it('checkIn_reservaVigente_registraCorrectamente', async () => {
+        // HU-04 - Registrar check-in
+        // CA 1: Dado que existe una reserva vigente para la fecha correspondiente, cuando el
+        // usuario ejecute el check-in, entonces el sistema debe registrar la fecha y hora
+        // de ingreso.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = { isSuccess: true, data: { id: bookingId, status: 'CheckedIn', checkInTime: '2026-06-20T14:00:00Z' } };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.checkIn(bookingId);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/check-in`, {
+            method: 'POST'
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });
