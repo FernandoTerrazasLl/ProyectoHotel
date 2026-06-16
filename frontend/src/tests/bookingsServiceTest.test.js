@@ -87,4 +87,29 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('create_superaCapacidadHabitacion_retornaFallo', async () => {
+        // HU-02 - Crear reserva de habitación
+        // CA 4: Dado que la cantidad de personas supera la capacidad de la habitación,
+        // cuando se intente guardar la reserva, entonces el sistema debe rechazar la
+        // operación.
+        
+        // Arrange
+        const payload = {
+            ...createValidPayload(),
+            numberGuests: 5 // Supera la capacidad de la habitación simple (capacidad = 2)
+        };
+        const mockResponse = { isSuccess: false, errorCode: 'CAPACITY_EXCEEDED', message: 'La cantidad de personas supera la capacidad de la habitación.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.create(payload);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings', {
+            method: 'POST',
+            body: payload
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

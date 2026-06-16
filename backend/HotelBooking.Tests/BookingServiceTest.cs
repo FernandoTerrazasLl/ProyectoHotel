@@ -149,6 +149,38 @@ public class BookingServiceTest
         Assert.That(bookingsInDb.Count, Is.EqualTo(1), "Debería mantenerse únicamente la primera reserva en la base de datos");
     }
 
+    [Test]
+    public async Task CreateBookingAsync_SuperaCapacidadHabitacion_RetornaFallo()
+    {
+        // HU-02 - Crear reserva de habitación
+        // CA 4: Dado que la cantidad de personas supera la capacidad de la habitación,
+        // cuando se intente guardar la reserva, entonces el sistema debe rechazar la
+        // operación.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Now.AddDays(2),
+            CheckOutDate = DateTime.Now.AddDays(5),
+            NumberGuests = 5 // Capacidad de la habitación simple es 2, por lo que 5 la supera
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False, "El registro debería fallar por exceder capacidad");
+        Assert.That(result.ErrorCode, Is.EqualTo("CAPACITY_EXCEEDED"), "Debería retornar error de capacidad excedida");
+        
+        var bookingsInDb = await _bookingRepository.GetAllAsync();
+        Assert.That(bookingsInDb.Count, Is.EqualTo(0), "No debería guardarse ninguna reserva en la base de datos");
+    }
+
     private async Task SeedBaseDataAsync()
     {
         // 1. Precargar Huésped
