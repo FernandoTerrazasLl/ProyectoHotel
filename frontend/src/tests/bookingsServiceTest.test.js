@@ -337,4 +337,26 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('cancel_sinConfirmacion_retornaFallo', async () => {
+        // HU-07 - Cancelar reserva con mora simple
+        // CA 1: Dado que existe una reserva vigente, cuando el usuario seleccione
+        // cancelarla, entonces el sistema debe solicitar confirmación antes de aplicar el
+        // cambio.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = { isSuccess: false, errorCode: 'CANCELLATION_NOT_CONFIRMED', message: 'Debes confirmar la cancelación antes de procesar la operación.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.cancel(bookingId, false);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/cancel`, {
+            method: 'POST',
+            body: { confirmCancellation: false }
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

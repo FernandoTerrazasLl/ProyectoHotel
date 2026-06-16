@@ -568,6 +568,39 @@ public class BookingServiceTest
         Assert.That(result.Data.Status, Is.EqualTo(BookingStatus.CheckedIn));
     }
 
+    [Test]
+    public async Task CancelBookingAsync_SinConfirmacion_RetornaFallo()
+    {
+        // HU-07 - Cancelar reserva con mora simple
+        // CA 1: Dado que existe una reserva vigente, cuando el usuario seleccione
+        // cancelarla, entonces el sistema debe solicitar confirmación antes de aplicar el
+        // cambio.
+
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        var request = new CancelBookingRequest { ConfirmCancellation = false };
+
+        // Act
+        var result = await _service.CancelBookingAsync(1, request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("CANCELLATION_NOT_CONFIRMED"));
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest
