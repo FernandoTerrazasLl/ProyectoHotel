@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using Moq;
 
 [TestFixture]
 public class BookingServiceTest
@@ -157,15 +158,20 @@ public class BookingServiceTest
 
         // Arrange
         await SeedBaseDataAsync();
+        await _context.Guests.AddRangeAsync(
+            new Guest { Id = 2, FirstName = "Maria", LastName = "Lopez", DocumentType = "DNI", DocumentId = "87654321", Country = "Bolivia", CreatedAt = DateTime.Now },
+            new Guest { Id = 3, FirstName = "Carlos", LastName = "Gomez", DocumentType = "DNI", DocumentId = "11223344", Country = "Bolivia", CreatedAt = DateTime.Now }
+        );
+        await _context.SaveChangesAsync();
 
         var request = new CreateBookingRequest
         {
-            GuestIds = new List<int> { 1 },
+            GuestIds = new List<int> { 1, 2, 3 },
             MainGuestId = 1,
             RoomId = 1,
             CheckInDate = DateTime.Now.AddDays(2),
             CheckOutDate = DateTime.Now.AddDays(5),
-            NumberGuests = 5 // Capacidad de la habitación simple es 2, por lo que 5 la supera
+            NumberGuests = 3 // Capacidad de la habitación simple es 2, por lo que 3 la supera
         };
 
         // Act
@@ -222,29 +228,35 @@ public class BookingServiceTest
 
         // Arrange
         await SeedBaseDataAsync();
+        
+        var mockRoomRepository = new Moq.Mock<RoomRepository>(_context);
         var roomWithoutType = new Room
         {
-            Id = 2,
-            RoomNumber = "102",
-            RoomTypeId = 999, // ID de RoomType no existente
+            Id = 1,
+            RoomNumber = "101",
+            RoomTypeId = 1,
             Floor = 1,
-            IsActive = true
+            IsActive = true,
+            RoomType = null // No valid RoomType
         };
-        await _context.Rooms.AddAsync(roomWithoutType);
-        await _context.SaveChangesAsync();
+        mockRoomRepository
+            .Setup(r => r.GetByIdWithTypeAsync(1))
+            .ReturnsAsync(roomWithoutType);
+
+        var serviceWithMock = new BookingService(_bookingRepository, _guestRepository, mockRoomRepository.Object);
 
         var request = new CreateBookingRequest
         {
             GuestIds = new List<int> { 1 },
             MainGuestId = 1,
-            RoomId = 2, // Habitación sin variación válida
+            RoomId = 1, // Retornará nuestro roomWithoutType
             CheckInDate = DateTime.Now.AddDays(2),
             CheckOutDate = DateTime.Now.AddDays(5),
             NumberGuests = 1
         };
 
         // Act
-        var result = await _service.CreateBookingAsync(request);
+        var result = await serviceWithMock.CreateBookingAsync(request);
 
         // Assert
         Assert.That(result.IsSuccess, Is.False);
