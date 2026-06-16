@@ -76,6 +76,32 @@ public class GuestServiceTest
         Assert.That(guestsInDb.Count, Is.EqualTo(0), "No debería registrarse ningún huésped en la base de datos");
     }
 
+    [Test]
+    public async Task RegisterGuestAsync_DocumentoDuplicado_ImpideRegistro()
+    {
+        // HU-01 - Registrar huésped
+        // CA 3: Dado que ya existe un huésped con el mismo documento de identidad,
+        // cuando se intente registrar nuevamente, entonces el sistema debe impedir el
+        // duplicado.
+        
+        // Arrange
+        var request1 = CreateValidRegistrationRequest();
+        var request2 = CreateValidRegistrationRequest(); // Mismo documento
+        
+        // Registramos el primero exitosamente
+        await _service.RegisterGuestAsync(request1);
+
+        // Act - Intentamos registrar el segundo con el mismo documento
+        var result = await _service.RegisterGuestAsync(request2);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False, "El registro debería fallar por documento duplicado");
+        Assert.That(result.ErrorCode, Is.EqualTo("DUPLICATE_DOCUMENT"));
+        
+        var guestsInDb = await _repository.GetAllAsync();
+        Assert.That(guestsInDb.Count, Is.EqualTo(1), "Solo debería haber un huésped en la base de datos");
+    }
+
     private static GuestRegistrationRequest CreateValidRegistrationRequest()
     {
         return new GuestRegistrationRequest

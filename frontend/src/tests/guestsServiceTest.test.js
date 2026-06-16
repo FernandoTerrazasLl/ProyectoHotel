@@ -65,4 +65,26 @@ describe('guestsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('create_documentoDuplicado_impideDuplicado', async () => {
+        // HU-01 - Registrar huésped
+        // CA 3: Dado que ya existe un huésped con el mismo documento de identidad,
+        // cuando se intente registrar nuevamente, entonces el sistema debe impedir el
+        // duplicado.
+        
+        // Arrange
+        const payload = createValidPayload();
+        const mockResponse = { isSuccess: false, errorCode: 'DUPLICATE_DOCUMENT', message: 'Ya existe un huésped con el mismo tipo y número de documento en ese país.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await guestsService.create(payload);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Guests', {
+            method: 'POST',
+            body: payload
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

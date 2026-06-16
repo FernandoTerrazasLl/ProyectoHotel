@@ -12,9 +12,6 @@ export const guestsService = {
     },
 
     create(payload) {
-        return apiRequest(BASE_PATH, {
-            method: "POST",
-            body: payload,
-        });
+        throw new Error("Not implemented yet");
     },
 };
