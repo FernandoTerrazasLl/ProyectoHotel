@@ -210,4 +210,24 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('checkIn_reservaYaConCheckIn_retornaFallo', async () => {
+        // HU-04 - Registrar check-in
+        // CA 3: Dado que una reserva ya realizó check-in, cuando el usuario intente
+        // registrarlo nuevamente, entonces el sistema debe evitar duplicar la acción.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = { isSuccess: false, errorCode: 'CHECKIN_ALREADY_DONE', message: 'El check-in ya fue registrado para esta reserva.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.checkIn(bookingId);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/check-in`, {
+            method: 'POST'
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

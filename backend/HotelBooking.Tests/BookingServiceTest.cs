@@ -374,6 +374,47 @@ public class BookingServiceTest
         Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_CANCELLED"), "Debería retornar error de reserva cancelada");
     }
 
+    [Test]
+    public async Task CheckInAsync_ReservaYaConCheckIn_RetornaFallo()
+    {
+        // HU-04 - Registrar check-in
+        // CA 3: Dado que una reserva ya realizó check-in, cuando el usuario intente
+        // registrarlo nuevamente, entonces el sistema debe evitar duplicar la acción.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        // 1. Registrar una reserva ya con check-in
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today,
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.CheckedIn,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        
+        // 2. Asociar el huésped
+        var guestBooking = new GuestBooking
+        {
+            BookingId = 1,
+            GuestId = 1,
+            IsMainGuest = true
+        };
+        await _context.GuestBookings.AddAsync(guestBooking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckInAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False, "El check-in debería ser rechazado");
+        Assert.That(result.ErrorCode, Is.EqualTo("CHECKIN_ALREADY_DONE"), "Debería retornar error de check-in ya registrado");
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest
