@@ -180,6 +180,39 @@ public class BookingServiceTest
     }
 
     [Test]
+    public async Task CreateBookingAsync_SeleccionVariacionHabitacion_AsignaCaracteristicasBase()
+    {
+        // HU-05 - Gestionar variación de tipo de habitación en la reserva
+        // CA 3: Dado que el usuario seleccione una variación de habitación, cuando el
+        // sistema procese la selección, entonces debe asignar automáticamente sus
+        // características base correspondientes, como capacidad, descripción o precio
+        // referencial.
+
+        // Arrange
+        await SeedBaseDataAsync();
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Now.AddDays(2),
+            CheckOutDate = DateTime.Now.AddDays(5),
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.RoomTypeName, Is.EqualTo("Simple"));
+        Assert.That(result.Data.RoomTypeDescription, Is.EqualTo("Habitación simple"));
+        Assert.That(result.Data.RoomTypeCapacity, Is.EqualTo(2));
+        Assert.That(result.Data.RoomTypePricePerNight, Is.EqualTo(100m));
+    }
+
+    [Test]
     public async Task GetActiveAndFutureBookingsAsync_ReservasRegistradas_RetornaReservas()
     {
         // HU-03 - Consultar reservas activas y futuras

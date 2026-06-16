@@ -251,4 +251,40 @@ describe('bookingsService', () => {
         });
         expect(result.data.status).toBe('CheckedIn');
     });
+
+    it('create_seleccionVariacionHabitacion_asignaCaracteristicasBase', async () => {
+        // HU-05 - Gestionar variación de tipo de habitación en la reserva
+        // CA 3: Dado que el usuario seleccione una variación de habitación, cuando el
+        // sistema procese la selección, entonces debe asignar automáticamente sus
+        // características base correspondientes, como capacidad, descripción o precio
+        // referencial.
+        
+        // Arrange
+        const payload = createValidPayload();
+        const mockResponse = {
+            isSuccess: true,
+            data: {
+                id: 1,
+                ...payload,
+                roomTypeName: 'Simple',
+                roomTypeDescription: 'Habitación simple',
+                roomTypeCapacity: 2,
+                roomTypePricePerNight: 100
+            }
+        };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.create(payload);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings', {
+            method: 'POST',
+            body: payload
+        });
+        expect(result.data.roomTypeName).toBe('Simple');
+        expect(result.data.roomTypeDescription).toBe('Habitación simple');
+        expect(result.data.roomTypeCapacity).toBe(2);
+        expect(result.data.roomTypePricePerNight).toBe(100);
+    });
 });
