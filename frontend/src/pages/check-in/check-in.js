@@ -1,6 +1,6 @@
-import {bookingsService} from "../../services/bookingsService.js"
-import {formatCurrency, formatRoomInfo} from "../../utils/formatters.js"
-import {LATE_CANCELLATION_HOURS_THRESHOLD, LATE_CANCELLATION_RATE} from "../../config.js"
+import {bookingsService} from "../../services/bookingsService.js";
+import {formatCurrency, formatRoomInfo} from "../../utils/formatters.js";
+import {LATE_CANCELLATION_HOURS_THRESHOLD, LATE_CANCELLATION_RATE} from "../../config.js";
 
 
 class CheckInPage extends HTMLElement {
