@@ -52,4 +52,35 @@ public class RoomTypeServiceTest
         Assert.That(result[0].Name, Is.EqualTo("Simple"));
         Assert.That(result[1].Name, Is.EqualTo("Doble"));
     }
+
+    [Test]
+    public async Task GetRoomTypesAsync_ConsultaOpciones_RetornaTiposRequeridos()
+    {
+        // HU-05 - Gestionar variación de tipo de habitación en la reserva
+        // CA 2: Dado que existen tipos de habitación definidos, cuando el usuario consulte
+        // las opciones, entonces el sistema debe contemplar al menos: Simple, Suite,
+        // Doble con camas individuales y Doble matrimonial.
+
+        // Arrange
+        var roomType1 = new RoomType { Id = 1, Name = "Simple", Description = "S", Capacity = 2, PricePerNight = 100 };
+        var roomType2 = new RoomType { Id = 2, Name = "Suite", Description = "St", Capacity = 2, PricePerNight = 250 };
+        var roomType3 = new RoomType { Id = 3, Name = "Doble con camas individuales", Description = "DCI", Capacity = 2, PricePerNight = 150 };
+        var roomType4 = new RoomType { Id = 4, Name = "Doble matrimonial", Description = "DM", Capacity = 2, PricePerNight = 160 };
+        await _context.RoomTypes.AddRangeAsync(roomType1, roomType2, roomType3, roomType4);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetRoomTypesAsync();
+
+        // Assert
+        var names = new List<string>();
+        foreach (var rt in result)
+        {
+            names.Add(rt.Name);
+        }
+        Assert.That(names, Does.Contain("Simple"));
+        Assert.That(names, Does.Contain("Suite"));
+        Assert.That(names, Does.Contain("Doble con camas individuales"));
+        Assert.That(names, Does.Contain("Doble matrimonial"));
+    }
 }
