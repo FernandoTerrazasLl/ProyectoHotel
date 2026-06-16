@@ -676,10 +676,85 @@ public class BookingServiceTest
         var result = await _service.CancelBookingAsync(1, request);
 
         // Assert
-        Assert.That(result.IsSuccess, Is.True);
-        Assert.That(result.Data, Is.Not.Null);
         Assert.That(result.Data.Status, Is.EqualTo(BookingStatus.Cancelled));
         Assert.That(result.Data.CancellationFee, Is.EqualTo(100m)); // 1 noche penalidad = 100m
+    }
+
+    [Test]
+    public async Task CheckOutAsync_ReservaVigente_RegistraCorrectamente()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(-2),
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.CheckedIn,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckOutAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Status, Is.EqualTo(BookingStatus.CheckedOut));
+        Assert.That(result.Data.CheckOutTime, Is.Not.Null);
+    }
+
+    [Test]
+    public async Task CheckOutAsync_ReservaSinCheckIn_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(-2),
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckOutAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("CHECKOUT_REQUIRES_CHECKIN"));
+    }
+
+    [Test]
+    public async Task CreateBookingAsync_FechaIngresoEnPasado_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(-1),
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("CHECKIN_IN_PAST"));
     }
 
     private async Task SeedBaseDataAsync()

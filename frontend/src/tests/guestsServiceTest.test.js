@@ -87,4 +87,33 @@ describe('guestsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('getAll_huespedesExistentes_retornaHuespedes', async () => {
+        // Arrange
+        const mockGuests = [
+            { id: 1, firstName: 'Juan', lastName: 'Perez' }
+        ];
+        apiClient.apiRequest.mockResolvedValue(mockGuests);
+
+        // Act
+        const result = await guestsService.getAll();
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Guests');
+        expect(result).toEqual(mockGuests);
+    });
+
+    it('getById_huespedExistente_retornaHuesped', async () => {
+        // Arrange
+        const guestId = 1;
+        const mockGuest = { id: guestId, firstName: 'Juan', lastName: 'Perez' };
+        apiClient.apiRequest.mockResolvedValue(mockGuest);
+
+        // Act
+        const result = await guestsService.getById(guestId);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Guests/${guestId}`);
+        expect(result).toEqual(mockGuest);
+    });
 });

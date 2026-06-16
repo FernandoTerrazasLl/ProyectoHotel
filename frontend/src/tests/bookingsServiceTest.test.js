@@ -418,4 +418,46 @@ describe('bookingsService', () => {
         expect(result.data.status).toBe('Cancelled');
         expect(result.data.cancellationFee).toBe(100);
     });
+
+    it('checkOut_reservaVigente_registraCorrectamente', async () => {
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = { isSuccess: true, data: { id: bookingId, status: 'CheckedOut', checkOutTime: '2026-06-25T10:00:00Z' } };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.checkOut(bookingId);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/check-out`, {
+            method: 'POST'
+        });
+        expect(result).toEqual(mockResponse);
+    });
+
+    it('getAgenda_respuestaObjetoConData_retornaData', async () => {
+        // Arrange
+        const mockResponse = {
+            data: [{ id: 1, checkInDate: '2026-06-20T14:00:00Z', status: 'Confirmed' }]
+        };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.getAgenda();
+
+        // Assert
+        expect(result).toEqual(mockResponse.data);
+    });
+
+    it('getAgenda_respuestaObjetoSinData_retornaVacio', async () => {
+        // Arrange
+        const mockResponse = { data: null };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.getAgenda();
+
+        // Assert
+        expect(result).toEqual([]);
+    });
 });

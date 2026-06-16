@@ -66,8 +66,33 @@ describe('serviceContactsService', () => {
         // Act
         const result = await serviceContactsService.getAll();
 
-        // Assert
         expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/ServiceContacts');
         expect(result).toEqual(mockContacts);
+    });
+
+    it('getAll_respuestaObjetoConData_retornaData', async () => {
+        // Arrange
+        const mockResponse = {
+            data: [{ id: 1, serviceName: 'Lavandería', responsible: 'Maria Lopez', phone: '77777777' }]
+        };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await serviceContactsService.getAll();
+
+        // Assert
+        expect(result).toEqual(mockResponse.data);
+    });
+
+    it('getAll_respuestaObjetoSinData_retornaVacio', async () => {
+        // Arrange
+        const mockResponse = { data: null };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await serviceContactsService.getAll();
+
+        // Assert
+        expect(result).toEqual([]);
     });
 });
