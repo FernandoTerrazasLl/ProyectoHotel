@@ -38,4 +38,34 @@ describe('guestsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('create_camposIncompletos_retornaFallo', async () => {
+        // HU-01 - Registrar huésped
+        // CA 2: Dado que falta uno o más campos obligatorios, cuando intente guardar el
+        // formulario, entonces el sistema debe mostrar validaciones y no registrar el
+        // huésped.
+        
+        // Arrange
+        const payload = {
+            firstName: '', // campo obligatorio vacío
+            lastName: 'Perez',
+            documentType: 'DNI',
+            documentId: '12345678',
+            country: 'Bolivia',
+            email: 'juan@example.com',
+            phone: '77777777'
+        };
+        const mockResponse = { isSuccess: false, errorCode: 'MISSING_REQUIRED_FIELDS', message: 'Debes completar todos los campos obligatorios del huésped.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await guestsService.create(payload);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Guests', {
+            method: 'POST',
+            body: payload
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

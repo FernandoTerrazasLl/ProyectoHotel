@@ -33,7 +33,7 @@ public class GuestService
     {
         if (!HasRequiredFields(request))
         {
-            return OperationResult<Guest>.Failure(MissingRequiredFieldsCode, MissingRequiredFieldsMessage);
+            return OperationResult<Guest>.Failure("ROJO", "ROJO");
         }
 
         var normalizedEmail = NormalizeOptionalValue(request.Email);
@@ -42,11 +42,10 @@ public class GuestService
             return OperationResult<Guest>.Failure(InvalidEmailCode, InvalidEmailMessage);
         }
 
-        var allGuests = await _repository.GetAllAsync();
-        var existsDuplicate = allGuests.Any(g =>
-            g.DocumentType == request.DocumentType.Trim() &&
-            g.DocumentId == request.DocumentId.Trim() &&
-            g.Country == request.Country.Trim());
+        var existsDuplicate = await _repository.ExistsWithDocumentAsync(
+            request.DocumentType,
+            request.DocumentId,
+            request.Country);
 
         if (existsDuplicate)
         {

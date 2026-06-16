@@ -61,4 +61,35 @@ public class GuestServiceTest
         var guestsInDb = await _repository.GetAllAsync();
         Assert.That(guestsInDb.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    public async Task RegisterGuestAsync_CamposIncompletos_RetornaFallo()
+    {
+        // HU-01 - Registrar huésped
+        // CA 2: Dado que falta uno o más campos obligatorios, cuando intente guardar el
+        // formulario, entonces el sistema debe mostrar validaciones y no registrar el
+        // huésped.
+        
+        // Arrange
+        var request = new GuestRegistrationRequest
+        {
+            FirstName = "", // Campo obligatorio vacío
+            LastName = "Perez",
+            DocumentType = "DNI",
+            DocumentId = "12345678",
+            Country = "Bolivia",
+            Email = "juan@example.com",
+            Phone = "12345678"
+        };
+
+        // Act
+        var result = await _service.RegisterGuestAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False, "El registro debería fallar por campos incompletos");
+        Assert.That(result.ErrorCode, Is.EqualTo("MISSING_REQUIRED_FIELDS"));
+        
+        var guestsInDb = await _repository.GetAllAsync();
+        Assert.That(guestsInDb.Count, Is.EqualTo(0), "No debería registrarse ningún huésped en la base de datos");
+    }
 }
