@@ -1,0 +1,32 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { serviceContactsService } from '../services/serviceContactsService.js';
+import * as apiClient from '../utils/apiClient.js';
+
+vi.mock('../utils/apiClient.js');
+
+describe('serviceContactsService', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('getAll_contactosExistentes_retornaListaDeContactos', async () => {
+        // HU-06 - Visualizar contactos de servicios del hotel
+        // CA 1: Dado que existen contactos cargados en la base de datos, cuando el usuario
+        // ingrese a la página de servicios, entonces el sistema debe mostrar la lista de
+        // contactos disponibles.
+        
+        // Arrange
+        const mockContacts = [
+            { id: 1, serviceName: 'Lavandería', responsible: 'Maria Lopez', phone: '77777777' },
+            { id: 2, serviceName: 'Mantenimiento', responsible: 'Carlos Perez', phone: '88888888' }
+        ];
+        apiClient.apiRequest.mockResolvedValue(mockContacts);
+
+        // Act
+        const result = await serviceContactsService.getAll();
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/ServiceContacts');
+        expect(result).toEqual(mockContacts);
+    });
+});
