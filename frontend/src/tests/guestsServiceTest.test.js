@@ -9,6 +9,16 @@ describe('guestsService', () => {
         vi.clearAllMocks();
     });
 
+    const createValidPayload = () => ({
+        firstName: 'Juan',
+        lastName: 'Perez',
+        documentType: 'DNI',
+        documentId: '12345678',
+        country: 'Bolivia',
+        email: 'juan@example.com',
+        phone: '77777777'
+    });
+
     it('create_camposCompletos_registroCorrecto', async () => {
         // HU-01 - Registrar huésped
         // CA 1: Dado que la recepcionista accede al formulario de registro, cuando complete
@@ -16,15 +26,7 @@ describe('guestsService', () => {
         // correctamente al huésped.
         
         // Arrange
-        const payload = {
-            firstName: 'Juan',
-            lastName: 'Perez',
-            documentType: 'DNI',
-            documentId: '12345678',
-            country: 'Bolivia',
-            email: 'juan@example.com',
-            phone: '77777777'
-        };
+        const payload = createValidPayload();
         const mockResponse = { isSuccess: true, data: { id: 1, ...payload } };
         apiClient.apiRequest.mockResolvedValue(mockResponse);
 
@@ -47,13 +49,8 @@ describe('guestsService', () => {
         
         // Arrange
         const payload = {
-            firstName: '', // campo obligatorio vacío
-            lastName: 'Perez',
-            documentType: 'DNI',
-            documentId: '12345678',
-            country: 'Bolivia',
-            email: 'juan@example.com',
-            phone: '77777777'
+            ...createValidPayload(),
+            firstName: '' // campo obligatorio vacío
         };
         const mockResponse = { isSuccess: false, errorCode: 'MISSING_REQUIRED_FIELDS', message: 'Debes completar todos los campos obligatorios del huésped.' };
         apiClient.apiRequest.mockResolvedValue(mockResponse);

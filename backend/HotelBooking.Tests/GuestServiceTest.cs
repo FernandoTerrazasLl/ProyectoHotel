@@ -38,16 +38,7 @@ public class GuestServiceTest
         // correctamente al huésped.
         
         // Arrange
-        var request = new GuestRegistrationRequest
-        {
-            FirstName = "Juan",
-            LastName = "Perez",
-            DocumentType = "DNI",
-            DocumentId = "12345678",
-            Country = "Bolivia",
-            Email = "juan@example.com",
-            Phone = "12345678"
-        };
+        var request = CreateValidRegistrationRequest();
 
         // Act
         var result = await _service.RegisterGuestAsync(request);
@@ -71,16 +62,8 @@ public class GuestServiceTest
         // huésped.
         
         // Arrange
-        var request = new GuestRegistrationRequest
-        {
-            FirstName = "", // Campo obligatorio vacío
-            LastName = "Perez",
-            DocumentType = "DNI",
-            DocumentId = "12345678",
-            Country = "Bolivia",
-            Email = "juan@example.com",
-            Phone = "12345678"
-        };
+        var request = CreateValidRegistrationRequest();
+        request.FirstName = ""; // Campo obligatorio vacío
 
         // Act
         var result = await _service.RegisterGuestAsync(request);
@@ -91,5 +74,19 @@ public class GuestServiceTest
         
         var guestsInDb = await _repository.GetAllAsync();
         Assert.That(guestsInDb.Count, Is.EqualTo(0), "No debería registrarse ningún huésped en la base de datos");
+    }
+
+    private static GuestRegistrationRequest CreateValidRegistrationRequest()
+    {
+        return new GuestRegistrationRequest
+        {
+            FirstName = "Juan",
+            LastName = "Perez",
+            DocumentType = "DNI",
+            DocumentId = "12345678",
+            Country = "Bolivia",
+            Email = "juan@example.com",
+            Phone = "12345678"
+        };
     }
 }
