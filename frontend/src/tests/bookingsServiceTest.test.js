@@ -65,4 +65,26 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('create_reservaSolapada_retornaFallo', async () => {
+        // HU-02 - Crear reserva de habitación
+        // CA 3: Dado que una habitación ya está reservada en el mismo rango de fechas,
+        // cuando se intente registrar una nueva reserva para esa habitación, entonces
+        // el sistema debe impedir el solapamiento.
+        
+        // Arrange
+        const payload = createValidPayload();
+        const mockResponse = { isSuccess: false, errorCode: 'BOOKING_OVERLAP', message: 'Ya existe una reserva para la habitación en ese rango de fechas.' };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.create(payload);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings', {
+            method: 'POST',
+            body: payload
+        });
+        expect(result).toEqual(mockResponse);
+    });
 });

@@ -100,6 +100,55 @@ public class BookingServiceTest
         Assert.That(bookingsInDb.Count, Is.EqualTo(0), "No debería guardarse ninguna reserva en la base de datos");
     }
 
+    [Test]
+    public async Task CreateBookingAsync_ReservaSolapada_RetornaFallo()
+    {
+        // HU-02 - Crear reserva de habitación
+        // CA 3: Dado que una habitación ya está reservada en el mismo rango de fechas,
+        // cuando se intente registrar una nueva reserva para esa habitación, entonces
+        // el sistema debe impedir el solapamiento.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        var checkInDate = DateTime.Now.AddDays(2);
+        var checkOutDate = DateTime.Now.AddDays(5);
+
+        // 1. Crear primera reserva en la base de datos
+        var existingBooking = new Booking
+        {
+            RoomId = 1,
+            CheckInDate = checkInDate,
+            CheckOutDate = checkOutDate,
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(existingBooking);
+        await _context.SaveChangesAsync();
+
+        // 2. Intentar crear una segunda reserva para la misma habitación en el mismo rango
+        var request = new CreateBookingRequest
+        {
+            GuestIds = new List<int> { 1 },
+            MainGuestId = 1,
+            RoomId = 1,
+            CheckInDate = checkInDate,
+            CheckOutDate = checkOutDate,
+            NumberGuests = 1
+        };
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False, "El registro debería fallar por solapamiento");
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_OVERLAP"), "Debería retornar error de solapamiento de reserva");
+        
+        var bookingsInDb = await _bookingRepository.GetAllAsync();
+        Assert.That(bookingsInDb.Count, Is.EqualTo(1), "Debería mantenerse únicamente la primera reserva en la base de datos");
+    }
+
     private async Task SeedBaseDataAsync()
     {
         // 1. Precargar Huésped
