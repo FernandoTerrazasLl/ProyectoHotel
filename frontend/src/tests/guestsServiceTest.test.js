@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { guestsService } from "./guestsService.js";
+import { guestsService } from "../services/guestsService.js";
 
 describe("GuestsServiceTest", () => {
     beforeEach(() => {
