@@ -230,4 +230,25 @@ describe('bookingsService', () => {
         });
         expect(result).toEqual(mockResponse);
     });
+
+    it('checkIn_operacionExitosa_cambiaEstadoAEstadiaEnCurso', async () => {
+        // HU-04 - Registrar check-in
+        // CA 4: Dado que el check-in fue realizado correctamente, cuando finalice la
+        // operación, entonces la reserva debe cambiar a un estado que indique estadía
+        // en curso.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = { isSuccess: true, data: { id: bookingId, status: 'CheckedIn' } };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.checkIn(bookingId);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/check-in`, {
+            method: 'POST'
+        });
+        expect(result.data.status).toBe('CheckedIn');
+    });
 });

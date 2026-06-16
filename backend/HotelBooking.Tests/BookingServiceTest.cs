@@ -415,6 +415,45 @@ public class BookingServiceTest
         Assert.That(result.ErrorCode, Is.EqualTo("CHECKIN_ALREADY_DONE"), "Debería retornar error de check-in ya registrado");
     }
 
+    [Test]
+    public async Task CheckInAsync_OperacionExitosa_CambiaEstadoAEstadiaEnCurso()
+    {
+        // HU-04 - Registrar check-in
+        // CA 4: Dado que el check-in fue realizado correctamente, cuando finalice la
+        // operación, entonces la reserva debe cambiar a un estado que indique estadía
+        // en curso.
+
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today,
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        var guestBooking = new GuestBooking
+        {
+            BookingId = 1,
+            GuestId = 1,
+            IsMainGuest = true
+        };
+        await _context.GuestBookings.AddAsync(guestBooking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckInAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Status, Is.EqualTo(BookingStatus.CheckedIn));
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest
