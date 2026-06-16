@@ -30,7 +30,7 @@ class ServicesPage extends HTMLElement {
         if(!serviceContacts || serviceContacts.length === 0){
             serviceListElement.innerHTML = `
                 <not-found-component text="No hay servicios disponibles."></not-found-component>
-            `
+            `;
             return;
         }
 

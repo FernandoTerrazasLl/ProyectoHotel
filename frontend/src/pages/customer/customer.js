@@ -66,7 +66,7 @@ class CustomerPage extends HTMLElement {
     }
 
     loadCountryOptions() {
-        const countrySelect = this.querySelector('select[name="country"]');
+        const countrySelect = this.querySelector("select[name=\"country\"]");
         const countries = [
             "Bolivia",
             "Argentina",
@@ -117,7 +117,7 @@ class CustomerPage extends HTMLElement {
         listElement.innerHTML = "";
 
         if (!guests || guests.length === 0) {
-            listElement.innerHTML = '<not-found-component text="No hay huespedes registrados."></not-found-component>';
+            listElement.innerHTML = "<not-found-component text=\"No hay huespedes registrados.\"></not-found-component>";
             return;
         }
 

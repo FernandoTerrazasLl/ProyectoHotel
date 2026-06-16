@@ -10,9 +10,9 @@ export const BookingFormMixin = {
         const formBackground = this.querySelector(".booking__form-background");
         const cancelBtn = this.querySelector(".booking__form-cancel");
         const formElement = this.querySelector(".booking__form");
-        const roomTypeSelect = this.querySelector('select[name="roomType"]');
-        const checkInInput = this.querySelector('input[name="checkInDate"]');
-        const checkOutInput = this.querySelector('input[name="checkOutDate"]');
+        const roomTypeSelect = this.querySelector("select[name=\"roomType\"]");
+        const checkInInput = this.querySelector("input[name=\"checkInDate\"]");
+        const checkOutInput = this.querySelector("input[name=\"checkOutDate\"]");
  
         if (!createBtn || !formBackground || !cancelBtn || !formElement || !roomTypeSelect || !checkInInput || !checkOutInput) {
             return;
@@ -69,7 +69,7 @@ export const BookingFormMixin = {
     },
 
     async loadRoomTypeOptions() {
-        const roomSelect = this.querySelector('select[name="roomType"]');
+        const roomSelect = this.querySelector("select[name=\"roomType\"]");
         const roomTypes = await roomTypesService.getAll();
         if (!roomSelect) {
             return;
@@ -114,7 +114,7 @@ export const BookingFormMixin = {
         const rooms = Array.isArray(roomsRequest?.data) ? roomsRequest.data : [];
         this.availableRooms = rooms;
 
-        const roomSelect = this.querySelector('select[name="room"]');
+        const roomSelect = this.querySelector("select[name=\"room\"]");
         if (!roomSelect) {
             return;
         }
@@ -134,12 +134,12 @@ export const BookingFormMixin = {
     },
 
     resetRoomsOptions() {
-        const roomSelect = this.querySelector('select[name="room"]');
+        const roomSelect = this.querySelector("select[name=\"room\"]");
         if (!roomSelect) {
             return;
         }
 
-        roomSelect.innerHTML = '<option value="">Seleccionar</option>';
+        roomSelect.innerHTML = "<option value=\"\">Seleccionar</option>";
     },
 
     buildBookingPayload(formElement) {
@@ -161,7 +161,7 @@ export const BookingFormMixin = {
     },
 
     getSelectedGuestIds() {
-        return Array.from(this.querySelector('select[name="guestIds"]')?.selectedOptions ?? [])
+        return Array.from(this.querySelector("select[name=\"guestIds\"]")?.selectedOptions ?? [])
             .map((option) => Number(option.value))
             .filter((value) => Number.isInteger(value) && value > 0);
     },
@@ -236,7 +236,7 @@ export const BookingFormMixin = {
         const guests = await guestsService.getAll();
         this.guestsList = Array.isArray(guests) ? guests : [];
 
-        const guestSelect = this.querySelector('select[name="guestIds"]');
+        const guestSelect = this.querySelector("select[name=\"guestIds\"]");
         if (!guestSelect) {
             return;
         }
