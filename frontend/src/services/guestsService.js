@@ -12,6 +12,9 @@ export const guestsService = {
     },
 
     create(payload) {
-        return { isSuccess: false, data: null };
+        return apiRequest(BASE_PATH, {
+            method: "POST",
+            body: payload,
+        });
     },
 };
