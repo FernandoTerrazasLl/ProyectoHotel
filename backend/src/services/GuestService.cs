@@ -33,7 +33,7 @@ public class GuestService
     {
         if (!HasRequiredFields(request))
         {
-            return OperationResult<Guest>.Failure("ROJO", "ROJO");
+            return OperationResult<Guest>.Failure(MissingRequiredFieldsCode, MissingRequiredFieldsMessage);
         }
 
         var normalizedEmail = NormalizeOptionalValue(request.Email);
