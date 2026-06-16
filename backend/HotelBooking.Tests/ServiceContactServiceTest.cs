@@ -52,4 +52,27 @@ public class ServiceContactServiceTest
         Assert.That(result[0].ServiceName, Is.EqualTo("Lavandería"));
         Assert.That(result[1].ServiceName, Is.EqualTo("Mantenimiento"));
     }
+
+    [Test]
+    public async Task GetAllContactsAsync_DatosCargados_ContieneCamposPrincipales()
+    {
+        // HU-06 - Visualizar contactos de servicios del hotel
+        // CA 2: Dado que cada servicio tiene información registrada, cuando se visualice en
+        // la página, entonces deben mostrarse al menos el nombre del servicio,
+        // encargado y teléfono.
+
+        // Arrange
+        var contact = new ServiceContact { Id = 1, ServiceName = "Lavandería", Responsible = "Maria Lopez", Phone = "77777777" };
+        await _context.ServiceContacts.AddAsync(contact);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetAllContactsAsync();
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result[0].ServiceName, Is.EqualTo("Lavandería"));
+        Assert.That(result[0].Responsible, Is.EqualTo("Maria Lopez"));
+        Assert.That(result[0].Phone, Is.EqualTo("77777777"));
+    }
 }

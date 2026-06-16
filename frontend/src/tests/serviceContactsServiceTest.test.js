@@ -29,4 +29,28 @@ describe('serviceContactsService', () => {
         expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/ServiceContacts');
         expect(result).toEqual(mockContacts);
     });
+
+    it('getAll_datosCargados_contieneCamposPrincipales', async () => {
+        // HU-06 - Visualizar contactos de servicios del hotel
+        // CA 2: Dado que cada servicio tiene información registrada, cuando se visualice en
+        // la página, entonces deben mostrarse al menos el nombre del servicio,
+        // encargado y teléfono.
+        
+        // Arrange
+        const mockContacts = [
+            { id: 1, serviceName: 'Lavandería', responsible: 'Maria Lopez', phone: '77777777' }
+        ];
+        apiClient.apiRequest.mockResolvedValue(mockContacts);
+
+        // Act
+        const result = await serviceContactsService.getAll();
+
+        // Assert
+        expect(result[0].serviceName).toBeDefined();
+        expect(result[0].responsible).toBeDefined();
+        expect(result[0].phone).toBeDefined();
+        expect(result[0].serviceName).toBe('Lavandería');
+        expect(result[0].responsible).toBe('Maria Lopez');
+        expect(result[0].phone).toBe('77777777');
+    });
 });
