@@ -213,6 +213,48 @@ public class BookingServiceTest
     }
 
     [Test]
+    public async Task GetBookingByIdAsync_VisualizaReserva_MuestraInformacionVariacionElegida()
+    {
+        // HU-05 - Gestionar variación de tipo de habitación en la reserva
+        // CA 4: Dado que cada variación tiene características distintas, cuando se visualice la
+        // reserva o el resumen de selección, entonces el sistema debe mostrar la
+        // información específica de la variación elegida.
+
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today,
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        var guestBooking = new GuestBooking
+        {
+            BookingId = 1,
+            GuestId = 1,
+            IsMainGuest = true
+        };
+        await _context.GuestBookings.AddAsync(guestBooking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetBookingByIdAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.RoomTypeName, Is.EqualTo("Simple"));
+        Assert.That(result.Data.RoomTypeDescription, Is.EqualTo("Habitación simple"));
+        Assert.That(result.Data.RoomTypeCapacity, Is.EqualTo(2));
+        Assert.That(result.Data.RoomTypePricePerNight, Is.EqualTo(100m));
+    }
+
+    [Test]
     public async Task GetActiveAndFutureBookingsAsync_ReservasRegistradas_RetornaReservas()
     {
         // HU-03 - Consultar reservas activas y futuras

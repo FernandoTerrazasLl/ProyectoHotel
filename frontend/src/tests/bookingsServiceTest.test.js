@@ -287,4 +287,32 @@ describe('bookingsService', () => {
         expect(result.data.roomTypeCapacity).toBe(2);
         expect(result.data.roomTypePricePerNight).toBe(100);
     });
+
+    it('getById_visualizaReserva_muestraInformacionVariacionElegida', async () => {
+        // HU-05 - Gestionar variación de tipo de habitación en la reserva
+        // CA 4: Dado que cada variación tiene características distintas, cuando se visualice la
+        // reserva o el resumen de selección, entonces el sistema debe mostrar la
+        // información específica de la variación elegida.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = {
+            id: bookingId,
+            roomTypeName: 'Suite',
+            roomTypeDescription: 'Habitación Suite de lujo',
+            roomTypeCapacity: 4,
+            roomTypePricePerNight: 250
+        };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.getById(bookingId);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}`);
+        expect(result.roomTypeName).toBe('Suite');
+        expect(result.roomTypeDescription).toBe('Habitación Suite de lujo');
+        expect(result.roomTypeCapacity).toBe(4);
+        expect(result.roomTypePricePerNight).toBe(250);
+    });
 });
