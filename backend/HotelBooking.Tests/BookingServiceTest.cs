@@ -897,6 +897,221 @@ public class BookingServiceTest
         Assert.That(result.IsSuccess, Is.False);
         Assert.That(result.ErrorCode, Is.EqualTo("ROOM_NOT_AVAILABLE"));
     }
+        [Test]
+    public async Task GetBookingByIdAsync_ReservaNoExiste_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+
+        // Act
+        var result = await _service.GetBookingByIdAsync(999);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_NOT_FOUND"));
+    }
+
+    [Test]
+    public async Task CheckInAsync_ReservaConCheckOut_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today,
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.CheckedOut,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckInAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_ALREADY_FINISHED"));
+    }
+
+    [Test]
+    public async Task CheckInAsync_ReservaFueraDeFecha_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckInAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_NOT_CURRENT"));
+    }
+
+    [Test]
+    public async Task CheckOutAsync_ReservaNoExiste_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+
+        // Act
+        var result = await _service.CheckOutAsync(999);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_NOT_FOUND"));
+    }
+
+    [Test]
+    public async Task CheckOutAsync_ReservaCancelada_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(-2),
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.Cancelled,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckOutAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_CANCELLED"));
+    }
+
+    [Test]
+    public async Task CheckOutAsync_ReservaYaConCheckOut_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(-2),
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.CheckedOut,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.CheckOutAsync(1);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("CHECKOUT_ALREADY_DONE"));
+    }
+
+    [Test]
+    public async Task CancelBookingAsync_ReservaYaCancelada_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1,
+            Status = BookingStatus.Cancelled,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        var request = new CancelBookingRequest { ConfirmCancellation = true };
+
+        // Act
+        var result = await _service.CancelBookingAsync(1, request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_ALREADY_CANCELLED"));
+    }
+
+    [Test]
+    public async Task CancelBookingAsync_ReservaEnCurso_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(-2),
+            CheckOutDate = DateTime.Today.AddDays(2),
+            NumberGuests = 1,
+            Status = BookingStatus.CheckedIn,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        var request = new CancelBookingRequest { ConfirmCancellation = true };
+
+        // Act
+        var result = await _service.CancelBookingAsync(1, request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_IN_PROGRESS"));
+    }
+
+    [Test]
+    public async Task CancelBookingAsync_ReservaFinalizada_RetornaFallo()
+    {
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(-5),
+            CheckOutDate = DateTime.Today.AddDays(-2),
+            NumberGuests = 1,
+            Status = BookingStatus.CheckedOut,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        var request = new CancelBookingRequest { ConfirmCancellation = true };
+
+        // Act
+        var result = await _service.CancelBookingAsync(1, request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorCode, Is.EqualTo("BOOKING_ALREADY_FINISHED"));
+    }
 
     private async Task SeedBaseDataAsync()
     {
