@@ -269,6 +269,25 @@ public class BookingServiceTest
         Assert.That(result.Data[1].CheckInDate, Is.EqualTo(bookingFarFuture.CheckInDate), "La segunda reserva debe ser la más lejana cronológicamente");
     }
 
+    [Test]
+    public async Task GetActiveAndFutureBookingsAsync_SinReservas_RetornaListaVacia()
+    {
+        // HU-03 - Consultar reservas activas y futuras
+        // CA 3: Dado que no existen reservas para mostrar, cuando el usuario abra la vista,
+        // entonces el sistema debe informar que no hay datos disponibles.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        // Act
+        var result = await _service.GetActiveAndFutureBookingsAsync();
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Count, Is.EqualTo(0), "La lista de reservas debería estar vacía");
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest

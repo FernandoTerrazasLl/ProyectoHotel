@@ -152,4 +152,21 @@ describe('bookingsService', () => {
         expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings/agenda');
         expect(result).toEqual(mockBookings);
     });
+
+    it('getAgenda_sinReservas_retornaListaVacia', async () => {
+        // HU-03 - Consultar reservas activas y futuras
+        // CA 3: Dado que no existen reservas para mostrar, cuando el usuario abra la vista,
+        // entonces el sistema debe informar que no hay datos disponibles.
+        
+        // Arrange
+        const mockBookings = [];
+        apiClient.apiRequest.mockResolvedValue(mockBookings);
+
+        // Act
+        const result = await bookingsService.getAgenda();
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings/agenda');
+        expect(result).toEqual(mockBookings);
+    });
 });
