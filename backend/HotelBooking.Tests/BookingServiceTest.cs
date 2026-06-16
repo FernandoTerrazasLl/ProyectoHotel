@@ -635,6 +635,41 @@ public class BookingServiceTest
         Assert.That(result.Data.CancellationFee, Is.EqualTo(0m));
     }
 
+    [Test]
+    public async Task CancelBookingAsync_CancelacionTardia_CalculaMoraCorrespondiente()
+    {
+        // HU-07 - Cancelar reserva con mora simple
+        // CA 3: Dado que la cancelación se realiza dentro del plazo definido como tardío,
+        // cuando se procese la operación, entonces el sistema debe calcular y registrar
+        // la mora correspondiente.
+
+        // Arrange
+        await SeedBaseDataAsync();
+        var booking = new Booking
+        {
+            Id = 1,
+            RoomId = 1,
+            CheckInDate = DateTime.Now.AddHours(10), // 10 horas de anticipación (dentro de las 24 horas)
+            CheckOutDate = DateTime.Now.AddDays(3),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        var request = new CancelBookingRequest { ConfirmCancellation = true };
+
+        // Act
+        var result = await _service.CancelBookingAsync(1, request);
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Status, Is.EqualTo(BookingStatus.Cancelled));
+        Assert.That(result.Data.CancellationFee, Is.EqualTo(100m)); // 1 noche penalidad = 100m
+    }
+
     private async Task SeedBaseDataAsync()
     {
         var guest = new Guest

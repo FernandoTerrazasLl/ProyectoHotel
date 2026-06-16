@@ -388,4 +388,34 @@ describe('bookingsService', () => {
         expect(result.data.status).toBe('Cancelled');
         expect(result.data.cancellationFee).toBe(0);
     });
+
+    it('cancel_cancelacionTardia_calculaMoraCorrespondiente', async () => {
+        // HU-07 - Cancelar reserva con mora simple
+        // CA 3: Dado que la cancelación se realiza dentro del plazo definido como tardío,
+        // cuando se procese la operación, entonces el sistema debe calcular y registrar
+        // la mora correspondiente.
+        
+        // Arrange
+        const bookingId = 1;
+        const mockResponse = {
+            isSuccess: true,
+            data: {
+                id: bookingId,
+                status: 'Cancelled',
+                cancellationFee: 100
+            }
+        };
+        apiClient.apiRequest.mockResolvedValue(mockResponse);
+
+        // Act
+        const result = await bookingsService.cancel(bookingId, true);
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith(`/api/Bookings/${bookingId}/cancel`, {
+            method: 'POST',
+            body: { confirmCancellation: true }
+        });
+        expect(result.data.status).toBe('Cancelled');
+        expect(result.data.cancellationFee).toBe(100);
+    });
 });
