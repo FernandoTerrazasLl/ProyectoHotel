@@ -88,10 +88,9 @@ public class GuestServiceTest
         var request1 = CreateValidRegistrationRequest();
         var request2 = CreateValidRegistrationRequest(); // Mismo documento
         
-        // Registramos el primero exitosamente
         await _service.RegisterGuestAsync(request1);
 
-        // Act - Intentamos registrar el segundo con el mismo documento
+        // Act 
         var result = await _service.RegisterGuestAsync(request2);
 
         // Assert

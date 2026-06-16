@@ -50,7 +50,7 @@ describe('bookingsService', () => {
         const payload = {
             ...createValidPayload(),
             checkInDate: '2026-06-20T14:00:00Z',
-            checkOutDate: '2026-06-20T14:00:00Z' // Salida igual a ingreso
+            checkOutDate: '2026-06-20T14:00:00Z'
         };
         const mockResponse = { isSuccess: false, errorCode: 'INVALID_DATE_RANGE', message: 'La fecha de salida debe ser posterior a la fecha de ingreso.' };
         apiClient.apiRequest.mockResolvedValue(mockResponse);
@@ -97,7 +97,7 @@ describe('bookingsService', () => {
         // Arrange
         const payload = {
             ...createValidPayload(),
-            numberGuests: 5 // Supera la capacidad de la habitación simple (capacidad = 2)
+            numberGuests: 5 // Supera la capacidad 
         };
         const mockResponse = { isSuccess: false, errorCode: 'CAPACITY_EXCEEDED', message: 'La cantidad de personas supera la capacidad de la habitación.' };
         apiClient.apiRequest.mockResolvedValue(mockResponse);
@@ -122,6 +122,26 @@ describe('bookingsService', () => {
         // Arrange
         const mockBookings = [
             { id: 1, roomId: 1, roomNumber: '101', roomTypeName: 'Simple', checkInDate: '2026-06-20T14:00:00Z', checkOutDate: '2026-06-25T10:00:00Z', status: 'Confirmed' }
+        ];
+        apiClient.apiRequest.mockResolvedValue(mockBookings);
+
+        // Act
+        const result = await bookingsService.getAgenda();
+
+        // Assert
+        expect(apiClient.apiRequest).toHaveBeenCalledWith('/api/Bookings/agenda');
+        expect(result).toEqual(mockBookings);
+    });
+
+    it('getAgenda_multiplesReservas_retornaOrdenadasCronologicamente', async () => {
+        // HU-03 - Consultar reservas activas y futuras
+        // CA 2: Dado que las reservas tienen fecha de ingreso, cuando se presenten en la
+        // lista, entonces deben aparecer ordenadas cronológicamente.
+        
+        // Arrange
+        const mockBookings = [
+            { id: 1, checkInDate: '2026-06-25T14:00:00Z', status: 'Confirmed' },
+            { id: 2, checkInDate: '2026-06-20T14:00:00Z', status: 'Confirmed' } 
         ];
         apiClient.apiRequest.mockResolvedValue(mockBookings);
 

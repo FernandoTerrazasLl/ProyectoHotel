@@ -85,7 +85,7 @@ public class BookingServiceTest
             MainGuestId = 1,
             RoomId = 1,
             CheckInDate = checkInDate,
-            CheckOutDate = checkInDate, // Igual a la fecha de ingreso (no posterior)
+            CheckOutDate = checkInDate, // Igual
             NumberGuests = 1
         };
 
@@ -114,7 +114,6 @@ public class BookingServiceTest
         var checkInDate = DateTime.Now.AddDays(2);
         var checkOutDate = DateTime.Now.AddDays(5);
 
-        // 1. Crear primera reserva en la base de datos
         var existingBooking = new Booking
         {
             RoomId = 1,
@@ -127,7 +126,6 @@ public class BookingServiceTest
         await _context.Bookings.AddAsync(existingBooking);
         await _context.SaveChangesAsync();
 
-        // 2. Intentar crear una segunda reserva para la misma habitación en el mismo rango
         var request = new CreateBookingRequest
         {
             GuestIds = new List<int> { 1 },
@@ -192,7 +190,6 @@ public class BookingServiceTest
         // Arrange
         await SeedBaseDataAsync();
 
-        // 1. Registrar una reserva en el futuro
         var booking = new Booking
         {
             RoomId = 1,
@@ -204,7 +201,6 @@ public class BookingServiceTest
         };
         await _context.Bookings.AddAsync(booking);
         
-        // 2. Asociar el huésped a la reserva
         var guestBooking = new GuestBooking
         {
             Booking = booking,
@@ -225,9 +221,56 @@ public class BookingServiceTest
         Assert.That(result.Data[0].MainGuestFullName, Is.EqualTo("Juan Perez"), "El huésped principal debería ser Juan Perez");
     }
 
+    [Test]
+    public async Task GetActiveAndFutureBookingsAsync_MultiplesReservas_RetornaOrdenadasCronologicamente()
+    {
+        // HU-03 - Consultar reservas activas y futuras
+        // CA 2: Dado que las reservas tienen fecha de ingreso, cuando se presenten en la
+        // lista, entonces deben aparecer ordenadas cronológicamente.
+
+        // Arrange
+        await SeedBaseDataAsync();
+
+        var bookingFarFuture = new Booking
+        {
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(10),
+            CheckOutDate = DateTime.Today.AddDays(15),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(bookingFarFuture);
+
+        var bookingNearFuture = new Booking
+        {
+            RoomId = 1,
+            CheckInDate = DateTime.Today.AddDays(2),
+            CheckOutDate = DateTime.Today.AddDays(5),
+            NumberGuests = 1,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = DateTime.Now
+        };
+        await _context.Bookings.AddAsync(bookingNearFuture);
+
+        await _context.GuestBookings.AddAsync(new GuestBooking { Booking = bookingFarFuture, GuestId = 1, IsMainGuest = true });
+        await _context.GuestBookings.AddAsync(new GuestBooking { Booking = bookingNearFuture, GuestId = 1, IsMainGuest = true });
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetActiveAndFutureBookingsAsync();
+
+        // Assert
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        Assert.That(result.Data.Count, Is.EqualTo(2), "Debería retornar ambas reservas");
+        
+        Assert.That(result.Data[0].CheckInDate, Is.EqualTo(bookingNearFuture.CheckInDate), "La primera reserva debe ser la más cercana cronológicamente");
+        Assert.That(result.Data[1].CheckInDate, Is.EqualTo(bookingFarFuture.CheckInDate), "La segunda reserva debe ser la más lejana cronológicamente");
+    }
+
     private async Task SeedBaseDataAsync()
     {
-        // 1. Precargar Huésped
         var guest = new Guest
         {
             Id = 1,
@@ -240,7 +283,6 @@ public class BookingServiceTest
         };
         await _context.Guests.AddAsync(guest);
 
-        // 2. Precargar Tipo de Habitación
         var roomType = new RoomType
         {
             Id = 1,
@@ -251,7 +293,6 @@ public class BookingServiceTest
         };
         await _context.RoomTypes.AddAsync(roomType);
 
-        // 3. Precargar Habitación
         var room = new Room
         {
             Id = 1,
