@@ -13,6 +13,7 @@ public class GuestService
     private const string DuplicateDocumentMessage = "Ya existe un huésped con el mismo tipo y número de documento en ese país.";
 
     private readonly GuestRepository _repository;
+    private static readonly EmailAddressAttribute EmailValidator = new();
 
     public GuestService(GuestRepository repository)
     {
@@ -69,13 +70,7 @@ public class GuestService
 
     private static bool IsValidOptionalEmail(string? email)
     {
-        if (email is null)
-        {
-            return true;
-        }
-
-        var emailValidator = new EmailAddressAttribute();
-        return emailValidator.IsValid(email);
+        return email is null || EmailValidator.IsValid(email);
     }
 
     private static Guest BuildGuest(GuestRegistrationRequest request, string? normalizedEmail)
